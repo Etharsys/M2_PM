@@ -55,7 +55,7 @@ Video
 
 ### Grid based method 
 
-In the Eulerian viewpoint, the simulation takes place in a specific finite volume of space, which is represented by a 3D or 2D grid or field. The grid space is divided into a number of rectangular cells and the fluid flows through it. The  quantities  of the fluid are defined at every point of the grid. Instead of keeping record of every single particle  and its attributes, we keep record of the cells of a grid  where we can measure  how  their values change over time. (Bridson, 2008)
+In the **Eulerian viewpoint**, the simulation takes place in a specific finite volume of space, which is represented by a 3D or 2D grid or field. The grid space is divided into a number of rectangular cells and the fluid flows through it. The  quantities  of the fluid are defined at every point of the grid. Instead of keeping record of every single particle  and its attributes, we keep record of the cells of a grid  where we can measure  how  their values change over time. (Bridson, 2008)
 
 Implementation explained :
 
@@ -64,13 +64,15 @@ Implementation explained :
 
 ### Particle based method
 
-According to the Lagrangian viewpoint, we  define the fluid flow with particles where each particle carries its own properties, like mass, velocity, density etc. Conservation of mass and  Newton's laws apply directly to each fluid particle.  The Lagrangian method is easy to implement  as all the calculations are performed on the particles, but that makes them to rely heavily on the density which means in areas with low density, they could develop high percentage of inaccuracy  (Strantzi, 2016).
+According to the Lagrangian viewpoint, we  define the fluid flow with particles where each particle carries its own properties, like mass, velocity, density etc. Conservation of mass and  Newton's laws apply directly to each fluid particle.  The **Lagrangian method** is easy to implement  as all the calculations are performed on the particles, but that makes them to rely heavily on the density which means in areas with low density, they could develop high percentage of inaccuracy  (Strantzi, 2016).
 
 [Smoothed-particle hydrodynamics](https://en.wikipedia.org/wiki/Smoothed-particle_hydrodynamics)
 
+[Simple implementation example](https://pmocz.github.io/manuscripts/pmocz_sph.pdf)
+
 ### Hybrid methods 
 
-Also known as Material point methods
+Also known as **Material point methods**
 
 #### PIC method
 
@@ -78,7 +80,7 @@ The **particle-in-cell** (**PIC**) method refers to a technique used to solve a 
 
 #### FLIP method
 
-The FLIP (Fluid  Implicit Particle  Method) method is a simple modification of the PIC method. It was an attempt to solve the limitations of the PIC method, by Brackbill and Ruppel in 1986  (Brackbill and Ruppel,  1986).  To  avoid the interpolation during the particle-to-grid transfer, the FLIP method interpolates the change in the quantity (e.g. velocity) and  uses it to increment the particle value, instead of replacing it. Every increment undergoes one smoothing and the result is no numerical dissipation (Bridson,  
+The **FLIP (Fluid  Implicit Particle  Method)** method is a simple modification of the PIC method. It was an attempt to solve the limitations of the PIC method, by Brackbill and Ruppel in 1986  (Brackbill and Ruppel,  1986).  To  avoid the interpolation during the particle-to-grid transfer, the FLIP method interpolates the change in the quantity (e.g. velocity) and  uses it to increment the particle value, instead of replacing it. Every increment undergoes one smoothing and the result is no numerical dissipation (Bridson,  
 2008).
 
 ## References
