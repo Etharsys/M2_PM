@@ -8,8 +8,9 @@
 
 const GLuint VERTEX_ATTR_POSITION = 0;
 
-struct position{
-    position(float i,float j) : x(i), y(j){};
+struct Position
+{
+    Position(float _x,float _y) : x(_x), y(_y){};
 
     float x;
     float y;
@@ -19,13 +20,13 @@ struct position{
 class Vertex2D
 {
     public:
-        Vertex2D(float i, float j) : pos(i,j){};
+        Vertex2D(float x, float y) : pos(x,y){};
 
-        struct position pos;
+        Position pos;
 };
 
 template<typename T>
-std::vector<Vertex2D> get_non_empty_squares(float pas_x, float pas_y, std::vector<T> grid, float (*f)(T))
+std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, float (*f)(T))
 {
     float i = -1;
     float j = 1;
@@ -37,19 +38,19 @@ std::vector<Vertex2D> get_non_empty_squares(float pas_x, float pas_y, std::vecto
         if (f(*it)) //if the value is not zero
         {
             //f(*it) will be use later to display density of dye
-            squares.push_back(Vertex2D(i+pas_x/2,j-pas_y/2));
-            squares.push_back(Vertex2D(i,j));
-            squares.push_back(Vertex2D(i+pas_x,j));
-            squares.push_back(Vertex2D(i+pas_x,j-pas_y));
-            squares.push_back(Vertex2D(i,j-pas_y));
-            squares.push_back(Vertex2D(i,j));
+            squares.emplace_back(i+step_x/2,j-step_y/2);
+            squares.emplace_back(i,j);
+            squares.emplace_back(i+step_x,j);
+            squares.emplace_back(i+step_x,j-step_y);
+            squares.emplace_back(i,j-step_y);
+            squares.emplace_back(i,j);
         }
 
         ++it;
-        if ((i = i+pas_x) >= 1)
+        if ((i = i+step_x) >= 1)
         {
             i = -1;
-            j -= pas_y;
+            j -= step_y;
         }
     }
     return squares;
@@ -72,7 +73,7 @@ class SDLWindowManager
         *  !!!!(f can return either 0 or 1 at this point)!!!!
         */
         template <typename T>
-        void display_grid(unsigned int rows, unsigned int cols, std::vector<T> grid, float (*f)(T))
+        void display_grid(const unsigned int rows, const unsigned int cols, const std::vector<T>& grid, float (*f)(T))
         {
             std::vector<Vertex2D> squares = get_non_empty_squares(2./rows, 2./cols, grid, f);
             
@@ -84,14 +85,10 @@ class SDLWindowManager
 
             //Init vbo
             GLuint vbo;
-            std::vector<Vertex2D> vertices = {Vertex2D(-0.5f, -0.5f),
-                Vertex2D(0.5f,-0.5f),
-                Vertex2D(0.0f,0.5f)};
 
             glGenBuffers(1,&vbo);
             glBindBuffer(GL_ARRAY_BUFFER,vbo);
                 glBufferData(GL_ARRAY_BUFFER,squares.size()*sizeof(Vertex2D),&(squares[0]),GL_STATIC_DRAW);
-                //glBufferData(GL_ARRAY_BUFFER,squares.size()*sizeof(Vertex2D),&squares,GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER,0);
 
             //Init vao
@@ -129,8 +126,4 @@ class SDLWindowManager
             glDeleteBuffers(1,&vbo);
             glDeleteVertexArrays(1,&vao);
         }
-
-    private:
-        unsigned int width;
-        unsigned int height;
 };
