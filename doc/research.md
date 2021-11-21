@@ -83,6 +83,8 @@ The **particle-in-cell** (**PIC**) method refers to a technique used to solve a 
 The **FLIP (Fluid  Implicit Particle  Method)** method is a simple modification of the PIC method. It was an attempt to solve the limitations of the PIC method, by Brackbill and Ruppel in 1986  (Brackbill and Ruppel,  1986).  To  avoid the interpolation during the particle-to-grid transfer, the FLIP method interpolates the change in the quantity (e.g. velocity) and  uses it to increment the particle value, instead of replacing it. Every increment undergoes one smoothing and the result is no numerical dissipation (Bridson,  
 2008).
 
+[Video FLIP method performance](https://www.youtube.com/watch?v=i4KWiq3guRU&list=LL&index=1)
+
 ## References
 * https://en.wikipedia.org/wiki/Fluid
 * https://www.youtube.com/watch?v=Ra7aQlenTb8
