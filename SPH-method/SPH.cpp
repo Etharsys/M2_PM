@@ -1,9 +1,18 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 #include <eigen3/Eigen/Dense>
-using namespace Eigen;
 
+/*
+References : 
+https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
+https://lucasschuermann.com/writing/implementing-sph-in-2d
+https://matthias-research.github.io/pages/publications/sca03.pdf
+*/
+
+using namespace Eigen;
+using namespace std;
 
 // "Particle-Based Fluid Simulation for Interactive Applications" by Müller et al.
 // solver parameters
@@ -14,7 +23,7 @@ const static float H = 16.f;		   // kernel radius
 const static float HSQ = H * H;		   // radius^2 for optimization
 const static float MASS = 2.5f;		   // assume all particles have the same mass
 const static float VISC = 200.f;	   // viscosity constant
-const static float DT = 0.001f;	   // integration timestep
+const static float DT = 0.0007f;		   // integration timestep
 
 // smoothing kernels defined in Müller and their gradients
 // adapted to 2D per "SPH Based Shallow Water Simulation" by Solenthaler et al.
@@ -31,17 +40,119 @@ const static float BOUND_DAMPING = -0.5f;
 // stores density (rho) and pressure values for SPH
 struct Particle
 {
+	Particle() = default;
 	Particle(float _x, float _y) : x(_x, _y), v(0.f, 0.f), f(0.f, 0.f), rho(0), p(0.f) {}
 	Vector2d x, v, f;
 	float rho, p;
+
+	friend bool operator==(const Particle &p1, const Particle &p2)
+	{
+		return p1.x == p2.x;
+	}
 };
+
+class MyHashFunction
+{
+public:
+	// id is returned as hash function
+	size_t operator()(const Particle &p) const
+	{
+		return p.x(1) + p.x(0);
+	}
+};
+
+vector<vector<Particle>> connectedParticles(vector<Particle> particles) //revoir algo
+{
+	vector<Particle> nextParticles;
+	nextParticles.emplace_back(particles[0]);
+	unordered_set<Particle, MyHashFunction> processedParticles;
+	vector<Particle> particlesSet;
+	particlesSet.emplace_back(particles[0]);
+	processedParticles.insert(particles[0]);
+	vector<vector<Particle>> allSubSets;
+	while (!nextParticles.empty())
+	{
+		Particle p1 = nextParticles[nextParticles.size() - 1];
+		nextParticles.pop_back();
+		Particle *freeParticle = nullptr;
+		for (Particle &p2 : particles)
+		{
+			if (processedParticles.find(p2) == processedParticles.end())
+			{
+				if ((p1.x - p2.x).norm() <= H + H / 2)
+				{
+					nextParticles.emplace_back(p2);
+					particlesSet.emplace_back(p2);
+					processedParticles.insert(p2);
+				}
+				else
+				{
+					freeParticle = &p2;
+				}
+			}
+		}
+		if (nextParticles.empty())
+		{
+			allSubSets.emplace_back(particlesSet);
+			if (freeParticle == nullptr)
+			{
+				break;
+			}
+			nextParticles.emplace_back(*freeParticle);
+			particlesSet = vector<Particle>{};
+			particlesSet.emplace_back(*freeParticle);
+		}
+	}
+	return allSubSets;
+}
+
+// 3D cross product of OA and OB vectors, (i.e z-component of their "2D" cross product, but remember that it is not defined in "2D").
+// Returns a positive value, if OAB makes a counter-clockwise turn,
+// negative for clockwise turn, and zero if the points are collinear.
+double cross(const Particle &O, const Particle &A, const Particle &B)
+{
+	return (A.x(0) - O.x(0)) * (B.x(1) - O.x(1)) - (A.x(1) - O.x(1)) * (B.x(0) - O.x(0));
+}
+
+// Returns a list of points on the convex hull in counter-clockwise order.
+// Note: the last point in the returned list is the same as the first one.
+vector<Particle> convex_hull(vector<Particle> P)
+{
+	size_t n = P.size(), k = 0;
+	if (n <= 3)
+		return P;
+	vector<Particle> H(2 * n);
+
+	// Sort points lexicographically
+	sort(P.begin(), P.end(), [](const Particle &p1, const Particle &p2)
+		 { return p1.x(0) < p2.x(0) || (p1.x(0) == p2.x(0) && p1.x(1) < p2.x(1)); });
+
+	// Build lower hull
+	for (size_t i = 0; i < n; ++i)
+	{
+		while (k >= 2 && cross(H[k - 2], H[k - 1], P[i]) <= 0)
+			k--;
+		H[k++] = P[i];
+	}
+
+	// Build upper hull
+	for (size_t i = n - 1, t = k + 1; i > 0; --i)
+	{
+		while (k >= t && cross(H[k - 2], H[k - 1], P[i - 1]) <= 0)
+			k--;
+		H[k++] = P[i - 1];
+	}
+
+	H.resize(k - 1);
+	return H;
+}
 
 // solver data
 static std::vector<Particle> particles;
 
 // interaction
 const static int MAX_PARTICLES = 2500;
-const static int DAM_PARTICLES = 500;
+const static int DAM_PARTICLES = 150;
 const static int BLOCK_PARTICLES = 250;
 
 // rendering projection parameters
@@ -53,9 +164,9 @@ const static double VIEW_HEIGHT = 1.5 * 600.f;
 void InitSPH(void)
 {
 	std::cout << "initializing dam break with " << DAM_PARTICLES << " particles" << std::endl;
-	for (float y = EPS; y < VIEW_HEIGHT - EPS * 2.f; y += H)
+	for (float y = EPS+VIEW_HEIGHT/4; y < VIEW_HEIGHT - EPS * 2.f; y += H)
 	{
-		for (float x = VIEW_WIDTH / 4; x <= VIEW_WIDTH / 2; x += H)
+		for (float x = VIEW_WIDTH /4; x <= VIEW_WIDTH / 3; x += H)
 		{
 			if (particles.size() < DAM_PARTICLES)
 			{
@@ -175,13 +286,36 @@ void Render(void)
 	glOrtho(0, VIEW_WIDTH, 0, VIEW_HEIGHT, 0, 1);
 
 	glColor4f(0.2f, 0.6f, 1.f, 1);
+
+	
+	for(auto& c : connectedParticles(particles))
+	{
+		if(c.size()<3)
+		{
+			glBegin(GL_POINTS);
+			for (auto &p : c)
+			{
+				glVertex2f(p.x(0), p.x(1));
+			}
+			glEnd();
+		}
+		else
+		{
+			glBegin(GL_POLYGON);
+			for (auto& p : convex_hull(c))
+			{
+				glVertex2f(p.x(0), p.x(1));
+			}
+			glEnd();
+		}
+	}
+	/*
 	glBegin(GL_POINTS);
 	for (auto &p : particles)
 	{
 		glVertex2f(p.x(0), p.x(1));
 	}
-	glEnd();
-
+	glEnd();*/
 	glutSwapBuffers();
 }
 
