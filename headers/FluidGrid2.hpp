@@ -48,9 +48,9 @@ class FluidGrid2
     public:
         /**
          * @brief : simulation of a grid where each cells represent a fluid location
-         * @arg size : the size of the grid
+         * @arg size : the size of the grid (DONT USE BELOW 4 !!!)
          * @arg diffusion : coefficient of the fluid diffusion capacity
-         * @arg lifespan : life time of the fluid since it started ? 
+         * @arg lifespan : time spacing between snapshots
          */
         FluidGrid2 (int    size,
                     double diffusion,
@@ -113,16 +113,23 @@ class FluidGrid2
         friend std::ostream& operator<<(std::ostream& os, FluidGrid2& fc);
 
         /**
-         * @brief : side of the grid
-         * @return : return the length of a side of the (cubical) grid
+         * @brief : side of the grid without borders
+         * @return : return the length of a side of the grid without counting borders
          */
-        int side() { return _size; }
+        int side() { return _size - 2; }
 
         /**
          * @brief : size of the grid
          * @return : return the number of cells of the grid (side * side)
          */
-        int size() { return _size * _size; }
+        int cells_n() { return _size * _size; }
+
+        /**
+         * @brief : size of the grid without borders
+         * @return : the return the number of cells without counting borders
+         *           ((side-2) * (side-2))
+         */
+        int in_cells_n() { return (_size - 2) * (_size - 2); }
 
 
 

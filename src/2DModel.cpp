@@ -6,22 +6,27 @@
 int main(int argc, char* argv[])
 {
     using namespace std;
-    FluidGrid2 grid { 5, .5, 0 };
+    int size = 6;
+
+    FluidGrid2 grid { size, .01, 0.1 };
     
     cout << grid << endl;
-    grid.add_density (Tuple<int> (2,0), 2.);
+    grid.add_density (Tuple<int> (2,1), 100.);
     //grid.add_density (Tuple<int> (1,1), 100.);
 
     cout << grid._sources;
-    Grid vx = GridStruct(grid.side()).init();
-    Grid vy = GridStruct(grid.side()).init();
-    for (int i = 0; i < grid.side(); i++) {
-        for (int j = 0; j < grid.side(); j++)
+    Grid vx = GridStruct(size).init();
+    Grid vy = GridStruct(size).init();
+    for (int i = 0; i < size; i++) 
+    {
+        for (int j = 0; j < size; j++)
         {
             vx[i][j] = 1.;
         }
     }
     //cout << vy << vx;
+    grid.dens_step(Tuple<Grid> (vx, vy));
+    cout << grid._densities;
     grid.dens_step(Tuple<Grid> (vx, vy));
     cout << grid._densities;
 
