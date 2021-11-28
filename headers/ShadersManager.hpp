@@ -14,6 +14,8 @@ class ShadersManager
             glDeleteProgram(program_id);
         }
 
+        GLuint get_id() { return program_id; }
+
         /* @brief Load grid.vs.glsl and grid.fs.glsl shaders*/
         void load_grid_shaders();
 

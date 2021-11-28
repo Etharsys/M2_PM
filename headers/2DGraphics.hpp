@@ -8,12 +8,12 @@
 #include "ShadersManager.hpp"
 
 const GLuint VERTEX_ATTR_POSITION = 0;
-const GLuint VERTEX_ATTR_COLOR = 1;
 
 /*Structure for positions*/
 struct Position
 {
-    Position(float _x,float _y) : x(_x), y(_y) {};
+    Position() : x(0), y(0) {}
+    Position(float _x,float _y) : x(_x), y(_y) {}
 
     float x;
     float y;
@@ -22,6 +22,7 @@ struct Position
 /*Structure for colors*/
 struct Color
 {
+    Color() : r(0), g(0), b(0){}
     Color(float _r, float _g, float _b) : r(_r), g(_g), b(_b){}
 
     float r;
@@ -37,6 +38,15 @@ class Vertex2D
         Vertex2D(float x, float y, Color c) : pos(x,y), col(c){};
         Position pos;
         Color col;
+};
+
+class Cell2D
+{
+    public :
+        Cell2D(Position _a, Position _b, Position _c, Position _d, Position _e, Position _f) :
+        a(_a), b(_b), c(_c), d(_d), e(_e), f(_f){};
+    
+        Position a,b,c,d,e,f;
 };
 
 /* @brief Retrive non empty grid squares using the function
@@ -58,14 +68,7 @@ std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vec
         Color c = f(*it);
         if (c.r+c.b+c.g) //if the value is not zero
         {
-            
-            //f(*it) will be use later to display density of dye
-            squares.emplace_back(i+step_x/2,j-step_y/2,c);
-            squares.emplace_back(i,j,c);
-            squares.emplace_back(i+step_x,j,c);
-            squares.emplace_back(i+step_x,j-step_y,c);
-            squares.emplace_back(i,j-step_y,c);
-            squares.emplace_back(i,j,c);
+            squares.emplace_back(i+1,j-1,c);
         }
 
         ++it;
@@ -98,7 +101,7 @@ class SDLWindowManager
         *  !!!!(f can return either 0 or 1 at this point)!!!!
         */
         template <typename T>
-        void display_grid(const unsigned int rows, const unsigned int cols, const std::vector<T>& grid, Color (*f)(T))
+        void display_grid(const unsigned int rows, const unsigned int cols, const std::vector<T>& grid, Color (*get_color)(T))
         {
             
             GLenum glewInitError = glewInit();
@@ -112,16 +115,23 @@ class SDLWindowManager
             manager.load_grid_shaders();
             manager.use_shaders();
 
+            float step_x = 2./rows;
+            float step_y = 2./cols;
 
-            //Init Datas
-            std::vector<Vertex2D> squares = get_non_empty_squares(2./rows, 2./cols, grid, f);
+            std::vector<Position> first_cell = 
+                   {Position(-1+step_x/2,1-step_y/2),
+                    Position(-1,1),
+                    Position(-1+step_x,1),
+                    Position(-1+step_x,1-step_y),
+                    Position(-1,1-step_y),
+                    Position(-1,1)};
 
             //Init vbo
             GLuint vbo;
 
             glGenBuffers(1,&vbo);
             glBindBuffer(GL_ARRAY_BUFFER,vbo);
-                glBufferData(GL_ARRAY_BUFFER,squares.size()*sizeof(Vertex2D),&(squares[0]),GL_STATIC_DRAW);
+                glBufferData(GL_ARRAY_BUFFER,first_cell.size()*sizeof(Position),&(first_cell[0]),GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER,0);
 
             //Init vao
@@ -130,15 +140,17 @@ class SDLWindowManager
             glBindVertexArray(vao);
                 glBindBuffer(GL_ARRAY_BUFFER,vbo);
                     glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
-                    glVertexAttribPointer(VERTEX_ATTR_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D),(const GLvoid*) offsetof(Vertex2D,pos));
-                    glEnableVertexAttribArray(VERTEX_ATTR_COLOR);
-                    glVertexAttribPointer(VERTEX_ATTR_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex2D),(const GLvoid*) offsetof(Vertex2D,col));
+                    glVertexAttribPointer(VERTEX_ATTR_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(Position),0);
                 glBindBuffer(GL_ARRAY_BUFFER,0);
             glBindVertexArray(0);
+            
+            GLint uTranslation = glGetUniformLocation( manager.get_id(), "uTranslation");
+            GLint uColor = glGetUniformLocation( manager.get_id(), "uColor");
 
             bool done = false;
             while(!done)
             {
+                std::vector<Vertex2D> squares = get_non_empty_squares(step_x, step_y, grid, get_color);
                 glClear(GL_COLOR_BUFFER_BIT);
                 SDL_Event e;
                 while(SDL_PollEvent(&e))
@@ -150,9 +162,11 @@ class SDLWindowManager
                 }
 
                 glBindVertexArray(vao);
-                for (int i = 0; i < squares.size(); i += 6)
+                for (auto vertex : squares)
                 {
-                    glDrawArrays(GL_TRIANGLE_FAN,i,6);
+                    glUniform2f(uTranslation, vertex.pos.x, vertex.pos.y);
+                    glUniform3f(uColor, vertex.col.r, vertex.col.g, vertex.col.b);
+                    glDrawArrays(GL_TRIANGLE_FAN,0,first_cell.size());
                 }
                 glBindVertexArray(0);
                 SDL_GL_SwapBuffers();

@@ -1,11 +1,13 @@
 #version 300 es
 
+uniform vec2 uTranslation;
+uniform vec3 uColor;
+
 layout(location = 0) in vec2 aVertexPosition;
-layout(location = 1) in vec3 aVertexColor;
 
 out vec3 vColor;
 
 void main() {
-    vColor = aVertexColor;
-    gl_Position = vec4(aVertexPosition, 0, 1);
+    vColor = uColor;
+    gl_Position = vec4(uTranslation + aVertexPosition,0, 1);
 }
