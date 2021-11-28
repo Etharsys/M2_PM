@@ -15,6 +15,6 @@ int main()
     
     SDLWindowManager window(500,500);
     
-    window.display_grid<float>(6, 6, grid, [](float i){ return i;});
+    window.display_grid<float>(6, 6, grid, [](float i){ return Color(i,i,i);});
     return 0;
 }

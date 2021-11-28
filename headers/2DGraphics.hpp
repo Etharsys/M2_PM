@@ -34,7 +34,7 @@ class Vertex2D
 {
     public:
         Vertex2D(float x, float y, float r, float g, float b) : pos(x,y), col(r,g,b){};
-
+        Vertex2D(float x, float y, Color c) : pos(x,y), col(c){};
         Position pos;
         Color col;
 };
@@ -43,30 +43,29 @@ class Vertex2D
 *  Param : float step_x : step for x coordinates
 *  Param : float step_y : step for y coordinates
 *  Param : std::vector<T> grid : grid containing datas
-*  Param : float (*f)(T) : function taking datas from the grid returning float between 0 and 1
+*  Param : Color (*f)(T) : function taking datas from the grid returning a Color having values between 0 and 1
 */
 template<typename T>
-std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, float (*f)(T))
+std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, Color (*f)(T))
 {
     float i = -1;
     float j = 1;
 
     std::vector<Vertex2D> squares;
     auto it = grid.begin();
-    float c; //color
     while (it != grid.end())
     {
-        
-        if (c = f(*it)) //if the value is not zero
+        Color c = f(*it);
+        if (c.r+c.b+c.g) //if the value is not zero
         {
             
             //f(*it) will be use later to display density of dye
-            squares.emplace_back(i+step_x/2,j-step_y/2,c,c,c);
-            squares.emplace_back(i,j,c,c,c);
-            squares.emplace_back(i+step_x,j,c,c,c);
-            squares.emplace_back(i+step_x,j-step_y,c,c,c);
-            squares.emplace_back(i,j-step_y,c,c,c);
-            squares.emplace_back(i,j,c,c,c);
+            squares.emplace_back(i+step_x/2,j-step_y/2,c);
+            squares.emplace_back(i,j,c);
+            squares.emplace_back(i+step_x,j,c);
+            squares.emplace_back(i+step_x,j-step_y,c);
+            squares.emplace_back(i,j-step_y,c);
+            squares.emplace_back(i,j,c);
         }
 
         ++it;
@@ -99,7 +98,7 @@ class SDLWindowManager
         *  !!!!(f can return either 0 or 1 at this point)!!!!
         */
         template <typename T>
-        void display_grid(const unsigned int rows, const unsigned int cols, const std::vector<T>& grid, float (*f)(T))
+        void display_grid(const unsigned int rows, const unsigned int cols, const std::vector<T>& grid, Color (*f)(T))
         {
             
             GLenum glewInitError = glewInit();
