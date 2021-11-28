@@ -5,6 +5,8 @@
 #include <iterator>
 #include "2DGraphics.hpp"
 
+
+
 SDLWindowManager::SDLWindowManager(unsigned int window_width, unsigned int window_height, std::string title)
 {
     if (0 != SDL_Init( SDL_INIT_EVERYTHING ))
