@@ -53,7 +53,7 @@ class Cell2D
 *  Param : float step_x : step for x coordinates
 *  Param : float step_y : step for y coordinates
 *  Param : std::vector<T> grid : grid containing datas
-*  Param : Color (*f)(T) : function taking datas from the grid returning a Color having values between 0 and 1
+*  Param : Color (*f)(T) : function taking datas from the grid returning a Color containing floats between 0 and 1
 */
 template<typename T>
 std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, Color (*f)(T))
@@ -84,95 +84,48 @@ std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vec
 /* @brief class used to manage and display windows
 *  Can currently only display grids.
 */
-class SDLWindowManager
+class GridWindowManager
 {  
     public :
-
-        SDLWindowManager(unsigned int width, unsigned int height);
-        SDLWindowManager(unsigned int width, unsigned int height, std::string title);
-        ~SDLWindowManager();
-
-        /* @brief Display the 2D grid in black and white using the number of rows, columns and a function
+        /* @brief Create a GridWindowManager used to display the given grid
+        *  Param : width : width of the window
+        *  Param : height : height of the window
         *  Param : rows : number of rows
         *  Param : cols : number of columns
+        */
+        GridWindowManager(unsigned int width, unsigned int height,const unsigned int rows, const unsigned int cols);
+        GridWindowManager(unsigned int width, unsigned int height,const unsigned int rows, const unsigned int cols, std::string title);
+        ~GridWindowManager();
+
+        /* @brief Display the 2D grid in black and white using the number of rows, columns and a function
         *  Param : grid : vector representing the grid
-        *  Param : f    : function taking elements from the vector grid returning an float between 0 and 1 
-        * (may be identity) (representing the density of the fluid on a cell)
-        *  !!!!(f can return either 0 or 1 at this point)!!!!
+        *  Param : f    : function taking elements from the vector grid returning a Color containing float between 0 and 1 
+        * (may be identity (id,id,id) for shades of grey) (representing the density of the fluid on a cell)
         */
         template <typename T>
-        void display_grid(const unsigned int rows, const unsigned int cols, const std::vector<T>& grid, Color (*get_color)(T))
+        void display_grid(const std::vector<T>& grid, Color (*get_color)(T))
         {
-            
-            GLenum glewInitError = glewInit();
-            if(GLEW_OK != glewInitError) {
-                std::cerr << glewGetErrorString(glewInitError) << std::endl;
-                return;
-            }
+            std::vector<Vertex2D> squares = get_non_empty_squares(step_x, step_y, grid, get_color);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-            //Init shaders
-            ShadersManager manager;
-            manager.load_grid_shaders();
-            manager.use_shaders();
-
-            float step_x = 2./rows;
-            float step_y = 2./cols;
-
-            std::vector<Position> first_cell = 
-                   {Position(-1+step_x/2,1-step_y/2),
-                    Position(-1,1),
-                    Position(-1+step_x,1),
-                    Position(-1+step_x,1-step_y),
-                    Position(-1,1-step_y),
-                    Position(-1,1)};
-
-            //Init vbo
-            GLuint vbo;
-
-            glGenBuffers(1,&vbo);
-            glBindBuffer(GL_ARRAY_BUFFER,vbo);
-                glBufferData(GL_ARRAY_BUFFER,first_cell.size()*sizeof(Position),&(first_cell[0]),GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER,0);
-
-            //Init vao
-            GLuint vao;
-            glGenVertexArrays(1,&vao);
             glBindVertexArray(vao);
-                glBindBuffer(GL_ARRAY_BUFFER,vbo);
-                    glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
-                    glVertexAttribPointer(VERTEX_ATTR_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(Position),0);
-                glBindBuffer(GL_ARRAY_BUFFER,0);
-            glBindVertexArray(0);
-            
-            GLint uTranslation = glGetUniformLocation( manager.get_id(), "uTranslation");
-            GLint uColor = glGetUniformLocation( manager.get_id(), "uColor");
-
-            bool done = false;
-            while(!done)
+            for (auto vertex : squares)
             {
-                std::vector<Vertex2D> squares = get_non_empty_squares(step_x, step_y, grid, get_color);
-                glClear(GL_COLOR_BUFFER_BIT);
-                SDL_Event e;
-                while(SDL_PollEvent(&e))
-                {
-                    if (e.type == SDL_QUIT)
-                    {
-                        done = true;
-                    }
-                }
-
-                glBindVertexArray(vao);
-                for (auto vertex : squares)
-                {
-                    glUniform2f(uTranslation, vertex.pos.x, vertex.pos.y);
-                    glUniform3f(uColor, vertex.col.r, vertex.col.g, vertex.col.b);
-                    glDrawArrays(GL_TRIANGLE_FAN,0,first_cell.size());
-                }
-                glBindVertexArray(0);
-                SDL_GL_SwapBuffers();
+                glUniform2f(uTranslation, vertex.pos.x, vertex.pos.y);
+                glUniform3f(uColor, vertex.col.r, vertex.col.g, vertex.col.b);
+                glDrawArrays(GL_TRIANGLE_FAN,0,cell.size());
             }
-
-            glDeleteBuffers(1,&vbo);
-            glDeleteVertexArrays(1,&vao);
+            glBindVertexArray(0);
+            SDL_GL_SwapBuffers();
         }
+    private : 
+        float step_x;
+        float step_y;
+        std::vector<Position> cell;
+
+        GLuint vao;
+        GLuint vbo;
+
+        GLuint uTranslation;
+        GLuint uColor;
 };

@@ -13,8 +13,20 @@ int main()
      0.,0.,0.,0.,0.5,0.,
      0.,0.,0.,0.,0.,0.6};
     
-    SDLWindowManager window(500,500);
+    GridWindowManager window(500,500,6,6);
     
-    window.display_grid<float>(6, 6, grid, [](float i){ return Color(i,i,i);});
+    bool done = false;
+    while(!done)
+    {
+        SDL_Event e;
+        while(SDL_PollEvent(&e))
+        {
+            if (e.type == SDL_QUIT)
+            {
+                done = true;
+            }
+        }
+        window.display_grid<float>( grid, [](float i){ return Color(i,0,i);});
+    }
     return 0;
 }
