@@ -10,8 +10,8 @@ include_directories(${Eigen_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${OPENGL_INCLUDE_
 
 set(ALL_LIBRARIES ${Eigen_LIBRARY} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
 
-file(GLOB_RECURSE src_files *.cpp)
-file(GLOB_RECURSE header_files *.hpp)
+file(GLOB_RECURSE src_files src/*.cpp)
+file(GLOB_RECURSE header_files headers/*.hpp)
 
 message(STATUS "source files founded : " ${src_files})
 message(STATUS "header files founded : " ${header_files})
