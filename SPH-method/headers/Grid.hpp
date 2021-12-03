@@ -13,48 +13,43 @@ public:
         grid = std::vector<std::unordered_set<T *>>(nb_rows * nb_columns);
     }
 
-    const std::vector<const T *> get_surrounding_elements(const float x, const float y) const
+    const std::vector<std::unordered_set<T *>> get_surrounding_elements(const int center) const
     {
-        std::vector<const T *> surrounding_elements;
-        if (x < x_min or x > x_max or y < y_min or y > y_max)
-        {
-            return surrounding_elements;
-        }
-        int row = get_row(y);
-        int column = get_column(x);
-        int center = get_index(row, column);
-        add_surrounding_elements(surrounding_elements, center);
+        std::vector<std::unordered_set<T *>> surrounding_elements;
+        int row = int(center/nb_columns);
+        int column = center - (row * nb_columns) ;
+        surrounding_elements.emplace_back(grid[center]);
         if (column > 0) // left
         {
-            add_surrounding_elements(surrounding_elements, center - 1);
+            surrounding_elements.emplace_back(grid[ center - 1]);
         }
         if (column < nb_columns - 1) // right
         {
-            add_surrounding_elements(surrounding_elements, center + 1);
+            surrounding_elements.emplace_back(grid[ center + 1]);
         }
         if (row > 0) // up
         {
-            add_surrounding_elements(surrounding_elements, center - nb_columns);
+            surrounding_elements.emplace_back(grid[ center - nb_columns]);
         }
         if (row < nb_rows - 1) // down
         {
-            add_surrounding_elements(surrounding_elements, center + nb_columns);
+            surrounding_elements.emplace_back(grid[ center + nb_columns]);
         }
         if (column > 0 && row > 0) // up-left
         {
-            add_surrounding_elements(surrounding_elements, center - nb_columns - 1);
+            surrounding_elements.emplace_back(grid[ center - nb_columns - 1]);
         }
         if (column < nb_columns - 1 && row > 0) // up-right
         {
-            add_surrounding_elements(surrounding_elements, center - nb_columns + 1);
+            surrounding_elements.emplace_back(grid[ center - nb_columns + 1]);
         }
         if (column > 0 && row < nb_rows - 1) // down-left
         {
-            add_surrounding_elements(surrounding_elements, center + nb_columns - 1);
+            surrounding_elements.emplace_back(grid[ center + nb_columns - 1]);
         }
         if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
         {
-            add_surrounding_elements(surrounding_elements, center + nb_columns + 1);
+            surrounding_elements.emplace_back(grid[ center + nb_columns + 1]);
         }
         return surrounding_elements;
     }
@@ -102,20 +97,22 @@ public:
         return elements;
     }
 
+    std::unordered_set<T *>& operator[](int index)
+    {
+        return grid[index];
+    }
+
+    int size()
+    {
+        return grid.size();
+    }
+
 private:
     int get_row(const float y) const { return int((y - y_min) / gap); }
 
     int get_column(const float x) const { return int((x - x_min) / gap); }
 
     int get_index(const float row, const float column) const { return row * nb_columns + column; }
-
-    void add_surrounding_elements(std::vector<const T *>& surrounding_elements, const int index) const
-    {
-        for (auto &element_set : grid[index])
-        {
-            surrounding_elements.emplace_back(element_set);
-        }
-    }
 
     const float x_min = 0;
     const float x_max = 0;

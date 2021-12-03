@@ -8,7 +8,7 @@ https://lucasschuermann.com/writing/implementing-sph-in-2d
 https://matthias-research.github.io/pages/publications/sca03.pdf
 */
 
-Fluid fluid{100,500,100,500};
+Fluid fluid{1000};
 
 void Update(void)
 {

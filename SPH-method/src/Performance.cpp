@@ -1,6 +1,7 @@
 #include <Fluid.hpp>
 #include <chrono>
 #include <iostream>
+#include <omp.h>
 
 
 using std::chrono::high_resolution_clock;
@@ -10,7 +11,7 @@ using std::chrono::milliseconds;
 
 int main(int argc, char const *argv[])
 {
-    Fluid fluid{100,500,100,500};
+    Fluid fluid{1000};
     
     for(int i = 0;i < 1000;i++)
     {

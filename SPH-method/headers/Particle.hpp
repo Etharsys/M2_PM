@@ -19,6 +19,11 @@ class Particle
 		return p1.position == p2.position;
 	}
 
+	friend bool operator!=(const Particle &p1, const Particle &p2)
+	{
+		return p1.position != p2.position;
+	}
+
 	class HashFunction
 	{
 		public:
@@ -35,4 +40,5 @@ class Particle
     Eigen::Vector2d force{0.,0.};
 	float density = 0.f;
     float pressure = 0.f;
+	bool processed = false;
 };
