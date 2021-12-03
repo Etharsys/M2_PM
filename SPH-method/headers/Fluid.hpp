@@ -2,15 +2,17 @@
 
 #include <vector>
 #include <Particle.hpp>
+#include <unordered_set>
+#include <Grid.hpp>
 
 class Fluid
 {
 public:
-    Fluid(int x_min, int x_max, int y_min, int y_max, float gap = H);
+    Fluid(const int x_min,const int x_max,const int y_min,const int y_max,const float gap = H);
 
-    Fluid(int nb_particles);
+    Fluid(const int nb_particles);
 
-    Fluid(Eigen::Vector2d center, int radius, float gap = H);
+    Fluid(const Eigen::Vector2d center,const int radius,const float gap = H);
 
     void compute_density_pressure();
 
@@ -19,14 +21,17 @@ public:
     void integrate();
 
     void update();
+    
 
     constexpr static int WIDTH = 800;
     constexpr static int HEIGHT = 600;
     constexpr static float H = 16.f;                // kernel radius
 
+    Grid<Particle,Particle::HashFunction> particles{H*2,0,WIDTH,0,HEIGHT};
+
 private:
     
-    std::vector<Particle> particles;
+    
 
     // "Particle-Based Fluid Simulation for Interactive Applications" by Müller et al.
     // solver parameters

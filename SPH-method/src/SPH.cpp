@@ -8,7 +8,7 @@ https://lucasschuermann.com/writing/implementing-sph-in-2d
 https://matthias-research.github.io/pages/publications/sca03.pdf
 */
 
-Fluid fluid{Eigen::Vector2d{400,300},200};
+Fluid fluid{100,500,100,500};
 
 void Update(void)
 {
@@ -34,7 +34,7 @@ void Render(void)
 	glColor4f(0.2f, 0.6f, 1.f, 1);
 	
 	glBegin(GL_POINTS);
-	for (auto &p : fluid.particles)
+	for (auto &p : fluid.particles.get_all_elements())
 	{
 		
 		glVertex2f(p.position(0), p.position(1));

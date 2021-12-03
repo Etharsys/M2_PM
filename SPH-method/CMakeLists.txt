@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(SPH LANGUAGES C CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+
 find_package(Eigen3 REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)
