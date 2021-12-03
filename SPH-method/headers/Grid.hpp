@@ -4,13 +4,13 @@
 #include <memory>
 #include <iostream>
 
-template <class T, class H>
+template <class T>
 class Grid
 {
 public:
     Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), x_max(x_max_), y_min(y_min_), y_max(y_max_), nb_columns(get_column(x_max) + 1), nb_rows(get_row(y_max) + 1)
     {
-        grid = std::vector<std::unordered_set<T *, H>>(nb_rows * nb_columns);
+        grid = std::vector<std::unordered_set<T *>>(nb_rows * nb_columns);
     }
 
     const std::vector<const T *> get_surrounding_elements(const float x, const float y) const
@@ -124,6 +124,6 @@ private:
     const float gap = 0;
     const int nb_columns = 0;
     const int nb_rows = 0;
-    std::vector<std::unordered_set<T *, H>> grid;
+    std::vector<std::unordered_set<T *>> grid;
     std::vector<T> elements;
 };

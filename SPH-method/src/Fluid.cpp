@@ -72,7 +72,6 @@ void Fluid::compute_forces()
         Eigen::Vector2d viscosity_force(0.f, 0.f);
         for (auto &particle_b : particles.get_surrounding_elements(particle_a.position.x(), particle_a.position.y()))
         {
-            
             if (particle_a == *particle_b)
             {
                 continue;

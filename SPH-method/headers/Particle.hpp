@@ -22,14 +22,11 @@ class Particle
 	class HashFunction
 	{
 		public:
-		size_t operator()(const Particle* particle) const
+		size_t operator()(const Particle * particle) const
 		{
-			/*
 			size_t xHash = std::hash<float>()(particle->position.x());
 			size_t yHash = std::hash<float>()(particle->position.y()) << 1;
 			return xHash ^ yHash;
-			*/
-			return particle->position.x()+particle->position.y();
 		}
 	};
 

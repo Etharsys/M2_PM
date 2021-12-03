@@ -27,7 +27,7 @@ public:
     constexpr static int HEIGHT = 600;
     constexpr static float H = 16.f;                // kernel radius
 
-    Grid<Particle,Particle::HashFunction> particles{H*2,0,WIDTH,0,HEIGHT};
+    Grid<Particle> particles{H*2,0,WIDTH,0,HEIGHT};
 
 private:
     
