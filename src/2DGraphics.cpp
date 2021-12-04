@@ -12,26 +12,30 @@ GridWindowManager::GridWindowManager(unsigned int window_width, unsigned int win
     step_x = 2./rows;
     step_y = 2./cols;
 
-    cell ={Position(-1+step_x/2,1-step_y/2),
+    cell = {
+        Position(-1+step_x/2,1-step_y/2),
         Position(-1,1),
         Position(-1+step_x,1),
         Position(-1+step_x,1-step_y),
         Position(-1,1-step_y),
-        Position(-1,1)};
+        Position(-1,1)
+    };
 
     if (0 != SDL_Init( SDL_INIT_EVERYTHING ))
     {
         std::cerr << SDL_GetError() << std::endl;
         return;
     }
-    if(!SDL_SetVideoMode(window_width, window_height, 32, SDL_OPENGL)) {
+    if(!SDL_SetVideoMode(window_width, window_height, 32, SDL_OPENGL)) 
+    {
         std::cerr << SDL_GetError() << std::endl;
         return;
     }
     SDL_WM_SetCaption("Grid", nullptr);
 
     GLenum glewInitError = glewInit();
-    if(GLEW_OK != glewInitError) {
+    if(GLEW_OK != glewInitError) 
+    {
         std::cerr << glewGetErrorString(glewInitError) << std::endl;
         return;
     }

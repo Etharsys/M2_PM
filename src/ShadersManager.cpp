@@ -86,7 +86,7 @@ void ShadersManager::load_shaders(std::string vs_path, std::string fs_path)
     glAttachShader(program_id, fs);
 
     glLinkProgram(program_id);
-	GLint status;
+    GLint status;
 	glGetProgramiv(program_id, GL_LINK_STATUS, &status);
 	if(status != GL_TRUE)
     {
