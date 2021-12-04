@@ -4,56 +4,60 @@
 #include <memory>
 #include <iostream>
 
+/* @brief Grid system dividing space in multiple tile of same size
+ *  @tparam T elements type
+ */
 template <class T>
 class Grid
 {
 public:
-    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), x_max(x_max_), y_min(y_min_), y_max(y_max_), nb_columns(get_column(x_max) + 1), nb_rows(get_row(y_max) + 1)
+    /* @brief Initialize grid container
+     *  @param gap_ tile size
+     *  @param x_min_ grid x_min
+     *  @param x_max_ grid x_max
+     *  @param y_min_ grid y_min
+     *  @param y_max_ grid y_max
+     */
+    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), y_min(y_min_), nb_columns(get_column(x_max_) + 1), nb_rows(get_row(y_max_) + 1)
     {
         grid = std::vector<std::unordered_set<T *>>(nb_rows * nb_columns);
     }
 
-    const std::vector<std::unordered_set<T *>> get_surrounding_elements(const int center) const
+    /* @brief get center, down-left, down, down-right and right surrounding elements
+     *  @param center grid tile index
+     *  @return list of set of elements
+     */
+    const std::vector<std::unordered_set<T *> *> get_surrounding_elements(const int center)
     {
-        std::vector<std::unordered_set<T *>> surrounding_elements;
-        int row = int(center/nb_columns);
-        int column = center - (row * nb_columns) ;
-        surrounding_elements.emplace_back(grid[center]);
-        if (column > 0) // left
-        {
-            surrounding_elements.emplace_back(grid[ center - 1]);
-        }
+        std::vector<std::unordered_set<T *> *> surrounding_elements;
+        int row = int(center / nb_columns);
+        int column = center - (row * nb_columns);
+        surrounding_elements.emplace_back(&grid[center]);
         if (column < nb_columns - 1) // right
         {
-            surrounding_elements.emplace_back(grid[ center + 1]);
-        }
-        if (row > 0) // up
-        {
-            surrounding_elements.emplace_back(grid[ center - nb_columns]);
+            surrounding_elements.emplace_back(&grid[center + 1]);
         }
         if (row < nb_rows - 1) // down
         {
-            surrounding_elements.emplace_back(grid[ center + nb_columns]);
-        }
-        if (column > 0 && row > 0) // up-left
-        {
-            surrounding_elements.emplace_back(grid[ center - nb_columns - 1]);
-        }
-        if (column < nb_columns - 1 && row > 0) // up-right
-        {
-            surrounding_elements.emplace_back(grid[ center - nb_columns + 1]);
+            surrounding_elements.emplace_back(&grid[center + nb_columns]);
         }
         if (column > 0 && row < nb_rows - 1) // down-left
         {
-            surrounding_elements.emplace_back(grid[ center + nb_columns - 1]);
+            surrounding_elements.emplace_back(&grid[center + nb_columns - 1]);
         }
         if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
         {
-            surrounding_elements.emplace_back(grid[ center + nb_columns + 1]);
+            surrounding_elements.emplace_back(&grid[center + nb_columns + 1]);
         }
         return surrounding_elements;
     }
 
+    /*
+     * @brief move element in the right tile
+     * new_x element new x position
+     * new_y element new y position
+     * element element not moved yet
+     */
     void move_element(const float new_x, const float new_y, T &element)
     {
         int row = get_row(element.position.y());
@@ -76,11 +80,19 @@ public:
         }
     }
 
+    /*
+     * @brief add new element in the container but not in the grid yet
+     * @param x position in x
+     * @param y position in y
+     */
     void add_element(const float x, const float y)
     {
         elements.emplace_back(x, y);
     }
 
+    /*
+     * @brief add all elements in the grid
+     */
     void sort_grid()
     {
         for (auto &element : elements)
@@ -92,35 +104,65 @@ public:
         }
     }
 
+    /*
+     * @brief get all elements
+     * @return all elements contained in the grid
+     */
     std::vector<T> &get_all_elements()
     {
         return elements;
     }
 
-    std::unordered_set<T *>& operator[](int index)
+    /*
+     * @brief access to a grid tile
+     * @param index tile index
+     * @return grid tile
+     */
+    std::unordered_set<T *> &operator[](int index)
     {
         return grid[index];
     }
 
+    /*
+     * @brief get grid number of tile
+     * @return number of tile
+     */
     int size()
     {
         return grid.size();
     }
 
 private:
+    /*
+     * @brief get row index
+     * @return row index
+     */
     int get_row(const float y) const { return int((y - y_min) / gap); }
 
+    /*
+     * @brief get column index
+     * @return column index
+     */
     int get_column(const float x) const { return int((x - x_min) / gap); }
 
+    /*
+     * @brief get tile index
+     * @return tile index
+     */
     int get_index(const float row, const float column) const { return row * nb_columns + column; }
 
+    /*grid x_min*/
     const float x_min = 0;
-    const float x_max = 0;
+    /*grid y_min*/
     const float y_min = 0;
-    const float y_max = 0;
+    /*tile gap*/
     const float gap = 0;
+    /*number of columns*/
     const int nb_columns = 0;
+    /*number of rows*/
     const int nb_rows = 0;
+    /*grid tiles*/
     std::vector<std::unordered_set<T *>> grid;
+    /*list of elements*/
     std::vector<T> elements;
 };

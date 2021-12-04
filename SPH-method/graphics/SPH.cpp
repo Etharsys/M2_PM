@@ -2,19 +2,17 @@
 #include <Fluid.hpp>
 
 /*
-References : 
-https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
-https://lucasschuermann.com/writing/implementing-sph-in-2d
-https://matthias-research.github.io/pages/publications/sca03.pdf
+opengl GL 2, fluid visualization
 */
 
-Fluid fluid{1000};
+Fluid fluid{400};
 
 void Update(void)
 {
 	fluid.update();
 	glutPostRedisplay();
 }
+
 
 void InitGL(void)
 {

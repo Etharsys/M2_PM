@@ -3,11 +3,14 @@
 #include <iostream>
 #include <omp.h>
 
-
 using std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::duration;
 using std::chrono::milliseconds;
+
+/*
+* test performance without rendering 
+*/
 
 int main(int argc, char const *argv[])
 {
