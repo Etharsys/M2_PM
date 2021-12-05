@@ -60,24 +60,22 @@ class GridWindowManager
         template<typename T>
         std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, Color (*f)(T))
         {
-            float i = -1;
-            float j = 1;
-
+            int rows = 0;
+            int cols = 0;
             std::vector<Vertex2D> squares;
             auto it = grid.begin();
-            while (it != grid.end())
+            for (auto it = grid.begin(); it != grid.end(); ++it)
             {
                 Color c = f(*it);
                 if (c.r+c.b+c.g) //if the value is not zero
                 {
-                    squares.emplace_back(i+1,j-1,c);
+                    squares.emplace_back(rows*step_x,-cols*step_y,c);
                 }
 
-                ++it;
-                if ((i = i+step_x) >= 1)
+                if ((++rows) >= nb_rows)
                 {
-                    i = -1;
-                    j -= step_y;
+                    rows = 0;
+                    cols++;
                 }
             }
             return squares;
@@ -85,6 +83,7 @@ class GridWindowManager
         
         float step_x;
         float step_y;
+        unsigned int nb_rows;
         std::vector<Position> cell;
 
         GLuint vao;
