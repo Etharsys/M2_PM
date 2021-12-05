@@ -47,4 +47,8 @@ public:
 	bool processed_density = false;
 	/*is force already processed*/
 	bool processed_force = false;
+	/*previous particle in the doubly linked list*/
+	Particle * previous;
+	/*next particle in the doubly linked list*/
+	Particle * next;
 };

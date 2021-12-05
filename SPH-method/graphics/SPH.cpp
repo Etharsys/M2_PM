@@ -5,7 +5,7 @@
 opengl GL 2, fluid visualization
 */
 
-Fluid fluid{400};
+Fluid fluid{1000};
 
 void Update(void)
 {
@@ -18,7 +18,7 @@ void InitGL(void)
 {
 	glClearColor(0.9f, 0.9f, 0.9f, 1);
 	glEnable(GL_POINT_SMOOTH);
-	glPointSize(fluid.H / 2.f);
+	glPointSize(fluid.H/2.);
 	glMatrixMode(GL_PROJECTION);
 }
 
@@ -34,9 +34,7 @@ void Render(void)
 	glBegin(GL_POINTS);
 	for (auto &p : fluid.particles.get_all_elements())
 	{
-		
 		glVertex2f(p.position(0), p.position(1));
-		
 	}
 	glEnd();
 	glutSwapBuffers();
@@ -81,7 +79,7 @@ int main(int argc, char **argv)
 	glutInitWindowSize(fluid.WIDTH, fluid.HEIGHT);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInit(&argc, argv);
-	glutCreateWindow("Müller SPH");
+	glutCreateWindow("SPH test");
 	glutDisplayFunc(Render);
 	glutIdleFunc(Update);
 	glutKeyboardFunc(Keyboard);

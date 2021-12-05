@@ -11,6 +11,8 @@ https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Mono
 https://lucasschuermann.com/writing/implementing-sph-in-2d
 https://matthias-research.github.io/pages/publications/sca03.pdf
 http://www.danenglesson.com/images/portfolio/FLIP/rapport.pdf
+https://github.com/tizian/SPH-Water-Simulation
+https://jcgt.org/published/0007/01/02/paper-lowres.pdf
 */
 
 /*  @brief Particle based fluid respecting navier stokes equations
@@ -55,10 +57,10 @@ public:
     constexpr static int WIDTH = 800;
     /*window height*/
     constexpr static int HEIGHT = 600;
-    /*particle radius*/
-    constexpr static float H = 16.f;
 
 private:
+    /*particle radius*/
+    constexpr static float H = 16.f;
     /*grid of particles*/
     Grid<Particle> particles{H * 2, 0, WIDTH, 0, HEIGHT};
     /*gravitation vector*/
@@ -76,8 +78,11 @@ private:
     /* time step */
     constexpr static float DT = 0.0007f;
 
+    /*Poly6 kernel*/
     const static float POLY6;
+    /*gradient of spiky kernel*/
     const static float SPIKY_GRAD;
+    /*laplacian of viscosity kernel*/
     const static float VISC_LAP;
     /*MASS * POLY6 value*/
     const static float MASS_X_POLY6;
@@ -85,6 +90,8 @@ private:
     const static Eigen::Vector2d G_X_MASS;
     /*VISC * MASS value*/
     const static float VISC_X_MASS;
+    /*MASS * POLY6 * pow(HSQ)*/
+    const static float MASS_X_POLY6_X_POW0;
 
     /* bound damping */
     constexpr static float BOUND_DAMPING = -0.5f;

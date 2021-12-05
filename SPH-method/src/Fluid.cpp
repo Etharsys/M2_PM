@@ -9,6 +9,7 @@ constexpr float Fluid::DT;
 const float Fluid::MASS_X_POLY6 = MASS * POLY6;
 const Eigen::Vector2d Fluid::G_X_MASS = G * MASS;
 const float Fluid::VISC_X_MASS = VISC * MASS;
+const float Fluid::MASS_X_POLY6_X_POW0 = MASS_X_POLY6 * pow(HSQ, 3.f);
 
 Fluid::Fluid(const int x_min, const int x_max, const int y_min, const int y_max, const float gap)
 {
@@ -54,11 +55,12 @@ void Fluid::compute_density_pressure()
     for (int i = 0; i < particles.size(); i++)
     {
         auto surrounding_particles = particles.get_surrounding_elements(i);
-        for (auto &particle_a : particles[i])
+        for (auto particle_a = particles[i]; particle_a!=nullptr;particle_a = particle_a->next )
         {
-            for (auto &particle_set : surrounding_particles)
+            #pragma omp parallel for num_threads(8)
+            for (auto particle_b : surrounding_particles)
             {
-                for (auto &particle_b : *particle_set)
+                for (; particle_b!=nullptr;particle_b = particle_b->next)
                 {
                     if(!particle_b->processed_density)
                     {
@@ -66,10 +68,20 @@ void Fluid::compute_density_pressure()
                         float squared_distance = vector_ab.squaredNorm();
                         if (squared_distance < HSQ)
                         {
-                            float density = MASS_X_POLY6 * pow(HSQ - squared_distance, 3.f);
+                            float density;
+                            if(squared_distance == 0)
+                            {
+                                density = MASS_X_POLY6_X_POW0;
+                            }
+                            else
+                            {
+                                density = MASS_X_POLY6 * pow(HSQ - squared_distance, 3.f);
+                            }
+                            #pragma omp critical
                             particle_a->density += density;
                             if(particle_a!=particle_b)
                             {
+                                #pragma omp critical
                                 particle_b->density += density;
                             }
                         }
@@ -84,15 +96,15 @@ void Fluid::compute_density_pressure()
 
 void Fluid::compute_forces()
 {
-    //#pragma omp parallel for num_threads(8)
     for (int i = 0; i < particles.size(); i++)
     {
-        const std::vector<std::unordered_set<Particle *>*> surrounding_particles = particles.get_surrounding_elements(i);
-        for (auto &particle_a : particles[i])
+        auto surrounding_particles = particles.get_surrounding_elements(i);
+        for (auto particle_a = particles[i]; particle_a!=nullptr;particle_a = particle_a->next )
         {
-            for (auto &particle_set : surrounding_particles)
+            #pragma omp parallel for num_threads(8)
+            for (auto particle_b : surrounding_particles)
             {
-                for (auto &particle_b : *particle_set)
+                for (; particle_b!=nullptr;particle_b = particle_b->next)
                 {
                     if(!particle_b->processed_force)
                     {
@@ -109,12 +121,16 @@ void Fluid::compute_forces()
                             float viscosity_coef  = VISC_LAP * (H - distance);
                             float pressure_coef = SPIKY_GRAD * pow(H - distance, 3.f);
                             // compute pressure force contribution
+                            #pragma omp critical
                             particle_a->force += -vector_ab * pressure / (2.f * particle_b->density) * pressure_coef;
                             // compute viscosity force contribution
+                            #pragma omp critical
                             particle_a->viscosity += VISC_X_MASS * (particle_b->velocity - particle_a->velocity) / particle_b->density * viscosity_coef;
-
+                            // compute pressure force contribution
+                            #pragma omp critical
                             particle_b->force += vector_ab * pressure / (2.f * particle_a->density) * pressure_coef;
-                        
+                            // compute viscosity force contribution
+                            #pragma omp critical
                             particle_b->viscosity += VISC_X_MASS * (particle_a->velocity - particle_b->velocity) / particle_a->density * viscosity_coef;
                         }
                     }
@@ -129,7 +145,7 @@ void Fluid::compute_forces()
 
 void Fluid::integrate()
 {
-    //#pragma omp parallel for num_threads(8)
+    #pragma omp parallel for num_threads(8)
     for (auto &particle : particles.get_all_elements())
     {   
         // forward Euler integration
@@ -163,7 +179,8 @@ void Fluid::integrate()
             particle.velocity.y() *= BOUND_DAMPING;
             newPositon.y() = HEIGHT - H;
         }
-        particles.move_element(newPositon.x(), newPositon.y(), particle);
+        #pragma omp critical
+        particles.move_element(newPositon.x(), newPositon.y(), &particle);
     }
 }
 

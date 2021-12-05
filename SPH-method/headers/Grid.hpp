@@ -4,8 +4,8 @@
 #include <memory>
 #include <iostream>
 
-/* @brief Grid system dividing space in multiple tile of same size
- *  @tparam T elements type
+/* @brief Grid system dividing space in multiple tile of same size, each tile is a doubly linked list
+ * @tparam T elements type
  */
 template <class T>
 class Grid
@@ -20,34 +20,34 @@ public:
      */
     Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), y_min(y_min_), nb_columns(get_column(x_max_) + 1), nb_rows(get_row(y_max_) + 1)
     {
-        grid = std::vector<std::unordered_set<T *>>(nb_rows * nb_columns);
+        grid = std::vector<T *>(nb_rows * nb_columns);
     }
 
     /* @brief get center, down-left, down, down-right and right surrounding elements
      *  @param center grid tile index
-     *  @return list of set of elements
+     *  @return list of element doubly linked list
      */
-    const std::vector<std::unordered_set<T *> *> get_surrounding_elements(const int center)
+    const std::vector<T *> get_surrounding_elements(const int center)
     {
-        std::vector<std::unordered_set<T *> *> surrounding_elements;
+        std::vector<T *> surrounding_elements;
         int row = int(center / nb_columns);
         int column = center - (row * nb_columns);
-        surrounding_elements.emplace_back(&grid[center]);
+        surrounding_elements.emplace_back(grid[center]);
         if (column < nb_columns - 1) // right
         {
-            surrounding_elements.emplace_back(&grid[center + 1]);
+            surrounding_elements.emplace_back(grid[center + 1]);
         }
         if (row < nb_rows - 1) // down
         {
-            surrounding_elements.emplace_back(&grid[center + nb_columns]);
+            surrounding_elements.emplace_back(grid[center + nb_columns]);
         }
         if (column > 0 && row < nb_rows - 1) // down-left
         {
-            surrounding_elements.emplace_back(&grid[center + nb_columns - 1]);
+            surrounding_elements.emplace_back(grid[center + nb_columns - 1]);
         }
         if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
         {
-            surrounding_elements.emplace_back(&grid[center + nb_columns + 1]);
+            surrounding_elements.emplace_back(grid[center + nb_columns + 1]);
         }
         return surrounding_elements;
     }
@@ -58,25 +58,25 @@ public:
      * new_y element new y position
      * element element not moved yet
      */
-    void move_element(const float new_x, const float new_y, T &element)
+    void move_element(const float new_x, const float new_y, T *element)
     {
-        int row = get_row(element.position.y());
-        int column = get_column(element.position.x());
+        int row = get_row(element->position.y());
+        int column = get_column(element->position.x());
         int old_index = get_index(row, column);
         row = get_row(new_y);
         column = get_column(new_x);
         int new_index = get_index(row, column);
         if (old_index == new_index)
         {
-            element.position[0] = new_x;
-            element.position[1] = new_y;
+            element->position[0] = new_x;
+            element->position[1] = new_y;
         }
         else
         {
-            grid[old_index].erase(&element);
-            element.position[0] = new_x;
-            element.position[1] = new_y;
-            grid[new_index].insert(&element);
+            remove(element, old_index);
+            element->position[0] = new_x;
+            element->position[1] = new_y;
+            add(element, new_index);
         }
     }
 
@@ -91,7 +91,7 @@ public:
     }
 
     /*
-     * @brief add all elements in the grid
+     * @brief add and sort all elements in the grid
      */
     void sort_grid()
     {
@@ -100,7 +100,7 @@ public:
             int row = get_row(element.position.y());
             int column = get_column(element.position.x());
             int index = get_index(row, column);
-            grid[index].insert(&element);
+            add(&element,index);
         }
     }
 
@@ -118,7 +118,7 @@ public:
      * @param index tile index
      * @return grid tile
      */
-    std::unordered_set<T *> &operator[](int index)
+    T * &operator[](int index)
     {
         return grid[index];
     }
@@ -133,6 +133,56 @@ public:
     }
 
 private:
+    /*
+    * @brief remove element in the doubly linked list
+    * @param element element to remove
+    * @param index grid tile
+    */
+    void remove(T *element, int index)
+    {
+        if (element->previous == nullptr) //head
+        {
+            if (element->next == nullptr) //tail
+            {
+                grid[index] = nullptr;
+            }
+            else
+            {
+                element->next->previous = nullptr;
+                grid[index] = element->next;
+                element->next = nullptr;
+            }
+        }
+        else
+        {
+            if (element->next == nullptr) //tail
+            {
+                element->previous->next = nullptr;
+                element->previous = nullptr;
+            }
+            else
+            {
+                element->previous->next = element->next;
+                element->next->previous = element->previous;
+                element->previous = nullptr;
+                element->next = nullptr;
+            }
+        }
+    }
+    /*
+    * @brief add element in the doubly linked list
+    * @param element element to add
+    * @param index grid tile
+    */
+    void add(T *element, int index)
+    {
+        if (grid[index] != nullptr)
+        {
+            element->next = grid[index];
+            element->next->previous = element;
+        }
+        grid[index] = element;
+    }
     /*
      * @brief get row index
      * @return row index
@@ -162,7 +212,7 @@ private:
     /*number of rows*/
     const int nb_rows = 0;
     /*grid tiles*/
-    std::vector<std::unordered_set<T *>> grid;
+    std::vector<T *> grid;
     /*list of elements*/
     std::vector<T> elements;
 };
