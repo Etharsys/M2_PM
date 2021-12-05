@@ -9,9 +9,10 @@
 
 GridWindowManager::GridWindowManager(unsigned int window_width, unsigned int window_height,const unsigned int rows, const unsigned int cols, std::string title)
 {
+    nb_rows = rows;
+    
     step_x = 2./rows;
     step_y = 2./cols;
-
     cell = {
         Position(-1+step_x/2,1-step_y/2),
         Position(-1,1),
