@@ -51,7 +51,7 @@ void FluidGrid2::diffuse(int bound, Grid& x, const Grid& x0, int iter)
         {
             for (int j = 1 ; j <= side(); j++ ) 
             {
-                auto tmp = x[i-1][j] + x[i+1][j] + x[i][j-1] + x[i][j+1];
+                auto tmp = x0[i-1][j] + x0[i+1][j] + x0[i][j-1] + x0[i][j+1];
                 x[i][j]  = (x0[i][j] + a*tmp) / (1+4*a);
             }
         }

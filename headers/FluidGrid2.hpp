@@ -4,7 +4,6 @@
 #include <vector>
 #include <iostream>
 
-
 using Grid = std::vector<std::vector<double>>;
 
 
@@ -23,7 +22,6 @@ struct GridStruct
         return grid;
     }
 
-
     Grid grid;
     int _size;
 };
@@ -31,6 +29,8 @@ struct GridStruct
 std::ostream& operator<<(std::ostream& os, const Grid& fd);
 
 
+
+    
 template <typename T>
 struct Tuple
 {
