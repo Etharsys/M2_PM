@@ -1,3 +1,5 @@
+#pragma once
+
 #include <array>
 #include <unordered_set>
 #include <Particle.hpp>
@@ -18,7 +20,7 @@ public:
      *  @param y_min_ grid y_min
      *  @param y_max_ grid y_max
      */
-    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), y_min(y_min_), nb_columns(get_column(x_max_) + 1), nb_rows(get_row(y_max_) + 1)
+    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), y_max(y_max_), nb_columns(get_column(x_max_) + 1), nb_rows(get_row(y_min_) + 1)
     {
         grid = std::vector<T *>(nb_rows * nb_columns);
     }
@@ -100,7 +102,7 @@ public:
             int row = get_row(element.position.y());
             int column = get_column(element.position.x());
             int index = get_index(row, column);
-            add(&element,index);
+            add(&element, index);
         }
     }
 
@@ -118,7 +120,7 @@ public:
      * @param index tile index
      * @return grid tile
      */
-    T * &operator[](int index)
+    T *&operator[](int index)
     {
         return grid[index];
     }
@@ -132,6 +134,33 @@ public:
         return grid.size();
     }
 
+    /*
+    * @brief get grid container
+    * @return grid vector
+    */
+    const std::vector<T *>& get_grid()
+    {
+        return grid;
+    }
+
+    /*
+    * @brief get the number of row in the grid
+    * @return the number of row
+    */
+    int get_nb_row()
+    {
+        return nb_rows;
+    }
+
+    /*
+    * @brief get the number of column in the grid
+    * @return the number of column
+    */
+    int get_nb_columns()
+    {
+        return nb_columns;
+    }
+
 private:
     /*
     * @brief remove element in the doubly linked list
@@ -140,9 +169,9 @@ private:
     */
     void remove(T *element, int index)
     {
-        if (element->previous == nullptr) //head
+        if (element->previous == nullptr) // head
         {
-            if (element->next == nullptr) //tail
+            if (element->next == nullptr) // tail
             {
                 grid[index] = nullptr;
             }
@@ -155,7 +184,7 @@ private:
         }
         else
         {
-            if (element->next == nullptr) //tail
+            if (element->next == nullptr) // tail
             {
                 element->previous->next = nullptr;
                 element->previous = nullptr;
@@ -170,10 +199,10 @@ private:
         }
     }
     /*
-    * @brief add element in the doubly linked list
-    * @param element element to add
-    * @param index grid tile
-    */
+     * @brief add element in the doubly linked list
+     * @param element element to add
+     * @param index grid tile
+     */
     void add(T *element, int index)
     {
         if (grid[index] != nullptr)
@@ -187,7 +216,7 @@ private:
      * @brief get row index
      * @return row index
      */
-    int get_row(const float y) const { return int((y - y_min) / gap); }
+    int get_row(const float y) const { return int((y_max - y) / gap); }
 
     /*
      * @brief get column index
@@ -204,7 +233,7 @@ private:
     /*grid x_min*/
     const float x_min = 0;
     /*grid y_min*/
-    const float y_min = 0;
+    const float y_max = 0;
     /*tile gap*/
     const float gap = 0;
     /*number of columns*/

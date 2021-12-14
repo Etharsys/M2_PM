@@ -57,12 +57,14 @@ public:
     constexpr static int WIDTH = 800;
     /*window height*/
     constexpr static int HEIGHT = 600;
-
-private:
     /*particle radius*/
     constexpr static float H = 16.f;
     /*grid of particles*/
     Grid<Particle> particles{H * 2, 0, WIDTH, 0, HEIGHT};
+
+private:
+    
+    
     /*gravitation vector*/
     static const Eigen::Vector2d G;
     /*rest density*/
