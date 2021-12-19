@@ -2,7 +2,7 @@
 
 #include <array>
 #include <unordered_set>
-#include <Particle.hpp>
+#include <SPH/Particle.hpp>
 #include <memory>
 #include <iostream>
 
@@ -83,19 +83,9 @@ public:
     }
 
     /*
-     * @brief add new element in the container but not in the grid yet
-     * @param x position in x
-     * @param y position in y
-     */
-    void add_element(const float x, const float y)
-    {
-        elements.emplace_back(x, y);
-    }
-
-    /*
      * @brief add and sort all elements in the grid
      */
-    void sort_grid()
+    void sort_grid(std::vector<T>& elements)
     {
         for (auto &element : elements)
         {
@@ -104,15 +94,6 @@ public:
             int index = get_index(row, column);
             add(&element, index);
         }
-    }
-
-    /*
-     * @brief get all elements
-     * @return all elements contained in the grid
-     */
-    std::vector<T> &get_all_elements()
-    {
-        return elements;
     }
 
     /*
@@ -138,7 +119,7 @@ public:
     * @brief get grid container
     * @return grid vector
     */
-    const std::vector<T *>& get_grid()
+    const std::vector<T *>& get_grid() const
     {
         return grid;
     }
@@ -147,7 +128,7 @@ public:
     * @brief get the number of row in the grid
     * @return the number of row
     */
-    int get_nb_row()
+    int get_nb_row() const
     {
         return nb_rows;
     }
@@ -156,7 +137,7 @@ public:
     * @brief get the number of column in the grid
     * @return the number of column
     */
-    int get_nb_columns()
+    int get_nb_columns() const
     {
         return nb_columns;
     }
@@ -242,6 +223,5 @@ private:
     const int nb_rows = 0;
     /*grid tiles*/
     std::vector<T *> grid;
-    /*list of elements*/
-    std::vector<T> elements;
+    
 };

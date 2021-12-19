@@ -1,4 +1,4 @@
-#include <Fluid.hpp>
+#include <SPH/Fluid.hpp>
 #include <chrono>
 #include <iostream>
 #include <omp.h>

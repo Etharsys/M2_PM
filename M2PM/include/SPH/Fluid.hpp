@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <Particle.hpp>
+#include <SPH/Particle.hpp>
 #include <unordered_set>
-#include <Grid.hpp>
+#include <SPH/Grid.hpp>
 
 /*
 References :
@@ -53,18 +53,28 @@ public:
     /* @brief Update each particle properties*/
     void update();
 
+    /* @brief Particle splatting rendering on top of fluid 
+    *  @return surface color buffer
+    */
+    std::vector<float> render_top_surface(int size);
+
+    /* @brief get the fluid grid
+    *  @return grid system
+    */
+    const Grid<Particle>& get_grid();
+
     /*window width*/
     constexpr static int WIDTH = 800;
     /*window height*/
     constexpr static int HEIGHT = 600;
+    
+private:
     /*particle radius*/
     constexpr static float H = 16.f;
     /*grid of particles*/
-    Grid<Particle> particles{H * 2, 0, WIDTH, 0, HEIGHT};
-
-private:
-    
-    
+    Grid<Particle> particles_grid{H * 2, 0, WIDTH, 0, HEIGHT};
+    /*list of elements*/
+    std::vector<Particle> particles;
     /*gravitation vector*/
     static const Eigen::Vector2d G;
     /*rest density*/

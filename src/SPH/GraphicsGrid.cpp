@@ -1,13 +1,12 @@
-#include <2DGraphics.hpp>
-#include <Fluid.hpp>
+#include <Graphics/2DGraphics.hpp>
+#include <SPH/Fluid.hpp>
 
 int main(int argc, char const *argv[])
 {
 
     Fluid fluid{1000};
 
-    GridWindowManager window(fluid.WIDTH, fluid.HEIGHT, fluid.particles.get_nb_columns(), fluid.particles.get_nb_row(), "SPH graphics");
-
+    GridWindowManager window(fluid.WIDTH, fluid.HEIGHT, fluid.get_grid().get_nb_columns(), fluid.get_grid().get_nb_row(), "SPH graphics");
     bool done = false;
     while (!done)
     {
@@ -19,8 +18,8 @@ int main(int argc, char const *argv[])
                 done = true;
             }
         }
-
-        window.display_grid<Particle *>(fluid.particles.get_grid(),
+        
+        window.display_grid<Particle *>(fluid.get_grid().get_grid(),
                                         [](Particle *particle)
                                         {
                                             int nbParticles = 0;
@@ -28,7 +27,7 @@ int main(int argc, char const *argv[])
                                             {
                                                 nbParticles++;
                                             }
-                                            return Color(0, 0, nbParticles / 10.);
+                                            return Color(0, 0, nbParticles / 100.);
                                         });
         fluid.update();
     }
