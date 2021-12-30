@@ -1,23 +1,26 @@
-#include <SPH/Fluid.hpp>
+#include <SPH/3D/Fluid3D.hpp>
 
-const Eigen::Vector2d Fluid::G{0.f, -10.f};
+const Eigen::Vector3d Fluid::G{0.f, 0.f,-10.f};
 const float Fluid::POLY6 = 4.f / (M_PI * pow(Fluid::H, 8.f));
 const float Fluid::SPIKY_GRAD = -10.f / (M_PI * pow(Fluid::H, 5.f));
 const float Fluid::VISC_LAP = 40.f / (M_PI * pow(Fluid::H, 5.f));
 constexpr float Fluid::MASS;
 constexpr float Fluid::DT;
 const float Fluid::MASS_X_POLY6 = MASS * POLY6;
-const Eigen::Vector2d Fluid::G_X_MASS = G * MASS;
+const Eigen::Vector3d Fluid::G_X_MASS = G * MASS;
 const float Fluid::VISC_X_MASS = VISC * MASS;
 const float Fluid::MASS_X_POLY6_X_POW0 = MASS_X_POLY6 * pow(HSQ, 3.f);
 
-Fluid::Fluid(const int x_min, const int x_max, const int y_min, const int y_max, const float gap)
+Fluid::Fluid(const int x_min, const int x_max, const int y_min, const int y_max, const int z_min, const int z_max, const float gap)
 {
     for (float x = x_min; x < x_max; x += gap)
     {
         for (float y = y_min; y < y_max; y += gap)
         {
-            particles.emplace_back(x, y);
+            for (float z = z_min; z < z_max; z += gap)
+            {
+                particles.emplace_back(x, y,z);
+            }
         }
     }
     particles_grid.sort_grid(particles);
@@ -34,16 +37,20 @@ Fluid::Fluid(const int nb_particles)
     particles_grid.sort_grid(particles);
 }
 
-Fluid::Fluid(const Eigen::Vector2d center, const int radius, const float gap)
+Fluid::Fluid(const Eigen::Vector3d center, const int radius, const float gap)
 {
     for (float x = center.x() - radius; x < center.x() + radius; x += gap)
     {
         for (float y = center.y() - radius; y < center.y() + radius; y += gap)
         {
-            if ((Eigen::Vector2d{x, y} - center).norm() < radius)
+            for (float z = center.z() - radius; z < center.z() + radius; z += gap)
             {
-                particles.emplace_back(x, y);
+                if ((Eigen::Vector3d{x, y, z} - center).norm() < radius)
+                {
+                    particles.emplace_back(x, y,z);
+                }
             }
+            
         }
     }
     particles_grid.sort_grid(particles);
@@ -64,7 +71,7 @@ void Fluid::compute_density_pressure()
                 {
                     if (!particle_b->processed_density)
                     {
-                        Eigen::Vector2d vector_ab = particle_b->position - particle_a->position;
+                        Eigen::Vector3d vector_ab = particle_b->position - particle_a->position;
                         float squared_distance = vector_ab.squaredNorm();
                         if (squared_distance < HSQ)
                         {
@@ -112,7 +119,7 @@ void Fluid::compute_forces()
                         {
                             continue;
                         }
-                        Eigen::Vector2d vector_ab = particle_b->position - particle_a->position;
+                        Eigen::Vector3d vector_ab = particle_b->position - particle_a->position;
                         float distance = vector_ab.norm();
                         vector_ab = vector_ab.normalized();
                         if (distance < H)
@@ -137,7 +144,7 @@ void Fluid::compute_forces()
                 }
             }
             particle_a->processed_force = true;
-            Eigen::Vector2d gravity_force = G_X_MASS / particle_a->density;
+            Eigen::Vector3d gravity_force = G_X_MASS / particle_a->density;
             particle_a->force = particle_a->force + particle_a->viscosity + gravity_force;
         }
     }
@@ -150,7 +157,7 @@ void Fluid::integrate()
     {
         // forward Euler integration
         particle.velocity += DT * particle.force / particle.density;
-        Eigen::Vector2d newPositon = particle.position + DT * particle.velocity;
+        Eigen::Vector3d newPositon = particle.position + DT * particle.velocity;
         particle.processed_density = false;
         particle.processed_force = false;
         particle.density = 0.f;
@@ -180,7 +187,7 @@ void Fluid::integrate()
             newPositon.y() = HEIGHT - H;
         }
 #pragma omp critical
-        particles_grid.move_element(newPositon.x(), newPositon.y(), &particle);
+        particles_grid.move_element(newPositon.x(), newPositon.y(),newPositon.z(), &particle);
     }
 }
 

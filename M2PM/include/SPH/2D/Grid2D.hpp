@@ -2,7 +2,7 @@
 
 #include <array>
 #include <unordered_set>
-#include <SPH/Particle.hpp>
+#include <SPH/2D/Particle2D.hpp>
 #include <memory>
 #include <iostream>
 

@@ -1,5 +1,5 @@
 #include <Graphics/2DGraphics.hpp>
-#include <SPH/Fluid.hpp>
+#include <SPH/2D/Fluid2D.hpp>
 
 int main(int argc, char const *argv[])
 {

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <SPH/Particle.hpp>
+#include <SPH/3D/Particle3D.hpp>
 #include <unordered_set>
-#include <SPH/Grid.hpp>
+#include <SPH/3D/Grid3D.hpp>
 
 /*
 References :
@@ -27,7 +27,7 @@ public:
      *  @param x_min y_max coordinate
      *  @param gap Distance between each particle
      */
-    Fluid(const int x_min, const int x_max, const int y_min, const int y_max, const float gap = H);
+    Fluid(const int x_min, const int x_max, const int y_min, const int y_max, const int z_min, const int z_max, const float gap = H);
 
     /* @brief Initialize fluid particles randomly
      *  @param nb_particles the number of particles
@@ -39,7 +39,7 @@ public:
      *  @param radius circle radius
      *  @param gap Distance between each particle
      */
-    Fluid(const Eigen::Vector2d center, const int radius, const float gap = H);
+    Fluid(const Eigen::Vector3d center, const int radius, const float gap = H);
 
     /* @brief Compute density and pressure for each particle */
     void compute_density_pressure();
@@ -53,30 +53,30 @@ public:
     /* @brief Update each particle properties*/
     void update();
 
-    /* @brief Particle splatting rendering on top of fluid 
-    *  @return surface color buffer
-    */
+    /* @brief Particle splatting rendering on top of fluid
+     *  @return surface color buffer
+     */
     std::vector<float> render_top_surface(int size);
 
     /* @brief get the fluid grid
-    *  @return grid system
-    */
-    const Grid<Particle>& get_grid();
+     *  @return grid system
+     */
+    const Grid<Particle> &get_grid();
 
     /*window width*/
     constexpr static int WIDTH = 800;
     /*window height*/
     constexpr static int HEIGHT = 600;
-    
+
 private:
     /*particle radius*/
     constexpr static float H = 16.f;
     /*grid of particles*/
-    Grid<Particle> particles_grid{H * 2, 0, WIDTH, 0, HEIGHT};
+    Grid<Particle> particles_grid{H * 2, 0, WIDTH, 0, HEIGHT,0,500};
     /*list of elements*/
     std::vector<Particle> particles;
     /*gravitation vector*/
-    static const Eigen::Vector2d G;
+    static const Eigen::Vector3d G;
     /*rest density*/
     constexpr static float REST_DENS = 300.f;
     /*GAS constant*/
@@ -99,12 +99,11 @@ private:
     /*MASS * POLY6 value*/
     const static float MASS_X_POLY6;
     /*G * MASS vector*/
-    const static Eigen::Vector2d G_X_MASS;
+    const static Eigen::Vector3d G_X_MASS;
     /*VISC * MASS value*/
     const static float VISC_X_MASS;
     /*MASS * POLY6 * pow(HSQ)*/
     const static float MASS_X_POLY6_X_POW0;
-
     /* bound damping */
     constexpr static float BOUND_DAMPING = -0.5f;
 };
