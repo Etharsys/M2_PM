@@ -4,8 +4,7 @@
 #include "SDLWindowManager.hpp"
 #include <GL/glew.h>
 #include <iostream>
-#include "Program.hpp"
-#include "FilePath.hpp"
+#include <ShadersManager.hpp>
 
 /* macros */
 
@@ -309,10 +308,10 @@ int main(int argc, char **argv)
         std::cerr << glewGetErrorString(glewInitError) << std::endl;
         return EXIT_FAILURE;
     }
-    FilePath applicationPath(argv[0]);
-    Program program = loadProgram(applicationPath.dirPath() + "shaders/grid.vs.glsl",
-                                  applicationPath.dirPath() + "shaders/grid.fs.glsl");
-    program.use();
+    ShadersManager sm;
+    sm.load_grid_shaders();
+    sm.use_shaders();
+    GLuint programId = sm.get_id();
 
     /*********************************
      * HERE SHOULD COME THE INITIALIZATION CODE
@@ -342,8 +341,8 @@ int main(int argc, char **argv)
 
     glBindVertexArray(0);
 
-    GLuint uColor = glGetUniformLocation(program.getGLId(), "uColor");
-    GLuint uTranslation = glGetUniformLocation(program.getGLId(), "uTranslation");
+    GLuint uColor = glGetUniformLocation(programId, "uColor");
+    GLuint uTranslation = glGetUniformLocation(programId, "uTranslation");
 
     // Application loop:
     bool done = false;

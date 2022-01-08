@@ -62,7 +62,7 @@ bool compile_shader(GLuint shader)
 
 void ShadersManager::use_shaders()
 {
-		glUseProgram(program_id);
+    glUseProgram(program_id);
 }
 
 void ShadersManager::load_shaders(std::string vs_path, std::string fs_path)
