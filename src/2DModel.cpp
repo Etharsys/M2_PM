@@ -1,10 +1,16 @@
+// Standard
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
-#include "SDLWindowManager.hpp"
-#include <GL/glew.h>
 #include <iostream>
+
+// OpenGL
+#include <GL/glew.h>
+
+// Project
+#include <Color.hpp>
 #include <ShadersManager.hpp>
+#include <2DGraphics.hpp>
 
 /* macros */
 
@@ -40,7 +46,6 @@ static int omx, omy, mx, my;
    free/clear/allocate simulation data
   ----------------------------------------------------------------------
 */
-
 
 static void free_data()
 {
@@ -100,17 +105,11 @@ static int allocate_data()
     return (1);
 }
 
-
 /*
   ----------------------------------------------------------------------
-   OpenGL specific drawing routines
+   Pretty colors
   ----------------------------------------------------------------------
 */
-struct Color
-{
-    float r, g, b;
-};
-
 
 float min(float a, float b)
 {
@@ -188,7 +187,7 @@ static ColorGradient colors{
 
 /*
   ----------------------------------------------------------------------
-   relates mouse movements to forces sources
+   Update grid with mouse movement
   ----------------------------------------------------------------------
 */
 
@@ -206,8 +205,8 @@ static void get_from_UI(float *d, float *su, float *sv)
         return;
     }
 
-    i = static_cast<int>((static_cast<float>(mx) / static_cast<float>(win_x)) * Nf);
-    j = static_cast<int>((static_cast<float>(my) / static_cast<float>(win_y)) * Nf);
+    i = static_cast<int>((static_cast<float>(mx) / static_cast<float>(win_x)) * Nf) + 1;
+    j = static_cast<int>((static_cast<float>(my) / static_cast<float>(win_y)) * Nf) + 1;
 
     if (i < 1 || i > N || j < 1 || j > N)
     {
@@ -229,13 +228,6 @@ static void get_from_UI(float *d, float *su, float *sv)
     omy = my;
 }
 
-/*
-  ----------------------------------------------------------------------
-   main --- main routine
-  ----------------------------------------------------------------------
-*/
-
-const GLuint VERTEX_ATTR_POSITION = 0;
 
 void handleEvent(SDL_Event &e)
 {
@@ -253,7 +245,8 @@ void handleEvent(SDL_Event &e)
             mouse_down[2] = 1;
         }
     }
-    else if (e.type == SDL_MOUSEBUTTONUP) {
+    else if (e.type == SDL_MOUSEBUTTONUP)
+    {
         if (e.button.button == SDL_BUTTON_LEFT)
         {
             mouse_down[0] = 0;
@@ -282,6 +275,24 @@ void print_array(float *array)
     }
 }
 
+/*
+  ----------------------------------------------------------------------
+   main
+  ----------------------------------------------------------------------
+*/
+
+std::vector<float> flat() {
+    std::vector<float>data;
+    int idx = 0;
+    for (auto j = 1; j <= N; j++) {
+        for (auto i = 1; i <= N; i++) {
+            data.push_back(dens[IX(i, j)]);
+            idx++;
+        }
+    }
+    return data;
+}
+
 int main(int argc, char **argv)
 {
     N = 128;
@@ -301,56 +312,13 @@ int main(int argc, char **argv)
     }
     clear_data();
 
-    SDLWindowManager windowManager(win_x, win_y, "UGE");
-    GLenum glewInitError = glewInit();
-    if (GLEW_OK != glewInitError)
-    {
-        std::cerr << glewGetErrorString(glewInitError) << std::endl;
-        return EXIT_FAILURE;
-    }
-    ShadersManager sm;
-    sm.load_grid_shaders();
-    sm.use_shaders();
-    GLuint programId = sm.get_id();
-
-    /*********************************
-     * HERE SHOULD COME THE INITIALIZATION CODE
-     *********************************/
-
-    GLuint buff_id;
-    glGenBuffers(1, &buff_id);
-    glBindBuffer(GL_ARRAY_BUFFER, buff_id);
-    float dx = 2.f * (float) Ts / (float) win_x;
-    float dy = 2.f * (float) Ts / (float) win_y;
-    GLfloat vertices[] = {
-            -1.f, 1.f, -1.f + dx, 1.f, -1.f + dx, 1.f - dy,
-            -1.f, 1.f, -1.f + dx, 1.f - dy, -1.f, 1.f - dy
-    };
-    glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
-
-    glBindBuffer(GL_ARRAY_BUFFER, buff_id);
-    glVertexAttribPointer(VERTEX_ATTR_POSITION, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
-
-    GLuint uColor = glGetUniformLocation(programId, "uColor");
-    GLuint uTranslation = glGetUniformLocation(programId, "uTranslation");
-
     // Application loop:
+    GridWindowManager window(win_x, win_y, N, N);
     bool done = false;
     while (!done)
     {
-        // Event loop:
         SDL_Event e;
-        while (windowManager.pollEvent(e))
+        while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
             {
@@ -366,7 +334,8 @@ int main(int argc, char **argv)
                 {
                     clear_data();
                 }
-                if (e.key.keysym.sym == SDLK_v) {
+                if (e.key.keysym.sym == SDLK_v)
+                {
                     visc += 0.0001f;
                 }
             }
@@ -376,41 +345,9 @@ int main(int argc, char **argv)
 
         vel_step(N, u, v, u_prev, v_prev, visc, dt);
         dens_step(N, dens, dens_prev, u, v, diff, dt);
-
-        glClear(GL_COLOR_BUFFER_BIT);
-        glBindVertexArray(vao);
-        for (int i = 0; i < N; i++)
-        {
-            for (int j = 0; j < N; j++)
-            {
-                auto src = dens[IX(i, j)];
-                if (src < 0.001)
-                {
-                    continue;
-                }
-                Color c = colors.get_color(src);
-                glUniform3f(uColor, c.r, c.g, c.b);
-                glUniform2f(uTranslation, 2 * (float) (i * Ts) / (float) win_x, -2 * (float) (j * Ts) / (float) win_y);
-                glDrawArrays(GL_TRIANGLES, 0, 6);
-            }
-        }
-
-//        glUniform3f(uColor, 0, 0, 1);
-//        glUniform2f(uTranslation, 0,0);
-//        glDrawArrays(GL_TRIANGLES, 0, 6);
-//        glBindVertexArray(0);
-
-        /*********************************
-         * HERE SHOULD COME THE RENDERING CODE
-         *********************************/
-
-        // Update the display
-        windowManager.swapBuffers();
+        window.display_grid<float>(flat(), [](float d){return colors.get_color(d);});
     }
 
     free_data();
-    glDeleteBuffers(1, &buff_id);
-    glDeleteVertexArrays(1, &vao);
-
     return EXIT_SUCCESS;
 }
