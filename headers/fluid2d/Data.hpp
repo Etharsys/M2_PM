@@ -22,7 +22,8 @@ namespace fluid2d
 
         void vel_step();
 
-        void update_viscosity(float x) {
+        void update_viscosity(float x)
+        {
             visc += x;
         }
 

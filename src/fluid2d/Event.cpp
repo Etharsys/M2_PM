@@ -48,7 +48,7 @@ namespace fluid2d
     void Event::reset_movement()
     {
         omx = mx;
-        omy = mx;
+        omy = my;
     }
 
     // Getters
