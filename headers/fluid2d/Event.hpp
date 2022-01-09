@@ -7,9 +7,9 @@ namespace fluid2d
 {
     struct Event
     {
-        explicit Event(int size);
+        Event(int size, float force);
 
-        Event(int winX, int winY);
+        Event(int winX, int winY, float force);
 
         void handleEvent(const SDL_Event &e);
 
@@ -37,6 +37,7 @@ namespace fluid2d
 
     private:
         int win_x, win_y;
+        float force;
         bool left{false}, middle{false}, right{false};
         int omx{0}, omy{0}, mx{0}, my{0};
     };

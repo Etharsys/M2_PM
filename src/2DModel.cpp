@@ -5,13 +5,8 @@
 #include <Color.hpp>
 #include <2DGraphics.hpp>
 #include <ColorGradient.hpp>
-#include <fluid2d/Config.hpp>
 #include <fluid2d/Event.hpp>
 #include <fluid2d/Data.hpp>
-
-extern void dens_step(int N, float *dens, float *dens_prev, float *u, float *v, float diff, float dt);
-
-extern void vel_step(int N, float *u, float *v, float *u_prev, float *v_prev, float viscosity, float dt);
 
 /*
  * Je l'aurais bien mis en champs du main mais j'arrive pas à créer le lambda du coup..
@@ -39,9 +34,9 @@ static ColorGradient colors{
 int main()
 {
     int N{128};
-    fluid2d::Config config(N, 5, .1, 0, .0001, 5, 100);
-    fluid2d::Event event(N * config.Ts);
-    fluid2d::Data data(N);
+    int TileSize{5};
+    fluid2d::Event event(N * TileSize, 5);
+    fluid2d::Data data(N, .1, 0, .0001, 100);
 
     // Application loop:
     GridWindowManager window(event.winX(), event.winY(), N, N);
@@ -63,15 +58,15 @@ int main()
                 }
                 if (e.key.keysym.sym == SDLK_v)
                 {
-                    config.visc += 0.0001f;
+                    data.update_viscosity(0.0001f);
                 }
             }
             event.handleEvent(e);
         }
-        data.get_from_UI(event, config);
+        data.get_from_UI(event);
 
-        data.vel_step(config);
-        data.dens_step(config);
+        data.vel_step();
+        data.dens_step();
 
         window.display_grid<float>(data.flat(), [](float d)
         {

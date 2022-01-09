@@ -2,19 +2,21 @@
 
 namespace fluid2d
 {
-    fluid2d::Event::Event(int size) :
+    Event::Event(int size, float force) :
             win_x(size),
-            win_y(size)
+            win_y(size),
+            force(force)
     {
     }
 
-    fluid2d::Event::Event(int winX, int winY) :
+    Event::Event(int winX, int winY, float force) :
             win_x(winX),
-            win_y(winY)
+            win_y(winY),
+            force(force)
     {
     }
 
-    void fluid2d::Event::handleEvent(const SDL_Event &e)
+    void Event::handleEvent(const SDL_Event &e)
     {
         if (e.type == SDL_MOUSEBUTTONDOWN)
         {
@@ -78,12 +80,12 @@ namespace fluid2d
 
     float Event::x_offset() const
     {
-        return static_cast<float>(mx - omx);
+        return force * static_cast<float>(mx - omx);
     }
 
     float Event::y_offset() const
     {
-        return static_cast<float>(my - omy);
+        return force * static_cast<float>(my - omy);
     }
 
     std::tuple<int, int> Event::get_position(float N) const

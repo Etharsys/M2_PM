@@ -7,7 +7,12 @@
 
 namespace fluid2d
 {
-    Data::Data(int N) : N{N}
+    Data::Data(int N, float dt, float diff, float visc, float source) :
+            N{N},
+            dt{dt},
+            diff{diff},
+            visc{visc},
+            source{source}
     {
         int size = (N + 2) * (N + 2);
 
@@ -77,9 +82,9 @@ namespace fluid2d
         return new_data;
     }
 
-    void Data::get_from_UI(Event &event, const Config &config) const
+    void Data::get_from_UI(Event &event) const
     {
-        for (int i = 0; i < config.size(); i++)
+        for (int i = 0; i < size(); i++)
         {
             u_prev[i] = v_prev[i] = dens_prev[i] = 0.0f;
         }
@@ -89,7 +94,7 @@ namespace fluid2d
             return;
         }
 
-        auto [i, j] = event.get_position(config.Nf);
+        auto[i, j] = event.get_position(static_cast<float>(N));
 
         if (i < 1 || i > N || j < 1 || j > N)
         {
@@ -98,23 +103,28 @@ namespace fluid2d
 
         if (event.left_click())
         {
-            u_prev[IX(i, j)] = config.force * event.x_offset();
-            v_prev[IX(i, j)] = config.force * event.y_offset();
+            u_prev[IX(i, j)] = event.x_offset();
+            v_prev[IX(i, j)] = event.y_offset();
         }
 
         if (event.right_click())
         {
-            dens_prev[IX(i, j)] = config.source;
+            dens_prev[IX(i, j)] = source;
         }
         event.reset_movement();
     }
 
+    int Data::size() const
+    {
+        return (N + 2) * (N + 2);
+    }
+
 // Fluid simulation
 
-    #define IX(i, j) ((i)+(N+2)*(j))
-    #define SWAP(x0, x) {float * tmp=x0;x0=x;x=tmp;}
-    #define FOR_EACH_CELL for ( i=1 ; i<=N ; i++ ) { for ( j=1 ; j<=N ; j++ ) {
-    #define END_FOR }}
+#define IX(i, j) ((i)+(N+2)*(j))
+#define SWAP(x0, x) {float * tmp=x0;x0=x;x=tmp;}
+#define FOR_EACH_CELL for ( i=1 ; i<=N ; i++ ) { for ( j=1 ; j<=N ; j++ ) {
+#define END_FOR }}
 
     void add_source(int N, float *x, const float *s, float dt)
     {
@@ -235,28 +245,28 @@ namespace fluid2d
         set_bnd(N, 2, v);
     }
 
-    void Data::dens_step(const Config &config)
+    void Data::dens_step()
     {
-        add_source(N, dens, dens_prev, config.dt);
+        add_source(N, dens, dens_prev, dt);
         SWAP (dens_prev, dens)
-        diffuse(N, 0, dens, dens_prev, config.diff, config.dt);
+        diffuse(N, 0, dens, dens_prev, diff, dt);
         SWAP (dens_prev, dens)
-        advect(N, 0, dens, dens_prev, u, v, config.dt);
+        advect(N, 0, dens, dens_prev, u, v, dt);
     }
 
-    void Data::vel_step(const Config &config)
+    void Data::vel_step()
     {
-        add_source(N, u, u_prev, config.dt);
-        add_source(N, v, v_prev, config.dt);
+        add_source(N, u, u_prev, dt);
+        add_source(N, v, v_prev, dt);
         SWAP (u_prev, u)
-        diffuse(N, 1, u, u_prev, config.visc, config.dt);
+        diffuse(N, 1, u, u_prev, visc, dt);
         SWAP (v_prev, v)
-        diffuse(N, 2, v, v_prev, config.visc, config.dt);
+        diffuse(N, 2, v, v_prev, visc, dt);
         project(N, u, v, u_prev, v_prev);
         SWAP (u_prev, u)
         SWAP (v_prev, v)
-        advect(N, 1, u, u_prev, u_prev, v_prev, config.dt);
-        advect(N, 2, v, v_prev, u_prev, v_prev, config.dt);
+        advect(N, 1, u, u_prev, u_prev, v_prev, dt);
+        advect(N, 2, v, v_prev, u_prev, v_prev, dt);
         project(N, u, v, u_prev, v_prev);
     }
 }

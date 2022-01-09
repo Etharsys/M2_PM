@@ -3,13 +3,12 @@
 #include <vector>
 
 #include <fluid2d/Event.hpp>
-#include <fluid2d/Config.hpp>
 
 namespace fluid2d
 {
     struct Data
     {
-        explicit Data(int N);
+        explicit Data(int N, float dt, float diff, float visc, float source);
 
         ~Data();
 
@@ -17,15 +16,22 @@ namespace fluid2d
 
         std::vector<float> flat() const;
 
-        void get_from_UI(Event &event, const Config &config) const;
+        void get_from_UI(Event &event) const;
 
-        void dens_step(const Config& config);
+        void dens_step();
 
-        void vel_step(const Config& config);
+        void vel_step();
+
+        void update_viscosity(float x) {
+            visc += x;
+        }
 
     private:
         int N;
+        float dt, diff, visc, source;
         float *u, *v, *u_prev, *v_prev;
         float *dens, *dens_prev;
+
+        int size() const;
     };
 }
