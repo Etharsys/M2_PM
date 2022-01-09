@@ -269,4 +269,9 @@ namespace fluid2d
         advect(N, 2, v, v_prev, u_prev, v_prev, dt);
         project(N, u, v, u_prev, v_prev);
     }
+
+    void Data::update_viscosity(float x)
+    {
+        visc += x;
+    }
 }
