@@ -19,6 +19,10 @@ namespace fluid2d
 
         void get_from_UI(Event &event, const Config &config) const;
 
+        void dens_step(const Config& config);
+
+        void vel_step(const Config& config);
+
         int N;
         float *u, *v, *u_prev, *v_prev;
         float *dens, *dens_prev;

@@ -9,11 +9,9 @@
 #include <fluid2d/Event.hpp>
 #include <fluid2d/Data.hpp>
 
-/* macros */
+extern void dens_step(int N, float *dens, float *dens_prev, float *u, float *v, float diff, float dt);
 
-extern void dens_step(int N, float *x, float *x0, float *u, float *v, float diff, float dt);
-
-extern void vel_step(int N, float *u, float *v, float *u0, float *v0, float viscosity, float dt);
+extern void vel_step(int N, float *u, float *v, float *u_prev, float *v_prev, float viscosity, float dt);
 
 /*
  * Je l'aurais bien mis en champs du main mais j'arrive pas à créer le lambda du coup..
@@ -72,8 +70,9 @@ int main()
         }
         data.get_from_UI(event, config);
 
-        vel_step(N, data.u, data.v, data.u_prev, data.v_prev, config.visc, config.dt);
-        dens_step(N, data.dens, data.dens_prev, data.u, data.v, config.diff, config.dt);
+        data.vel_step(config);
+        data.dens_step(config);
+
         window.display_grid<float>(data.flat(), [](float d)
         {
             return colors.get_color(d);
