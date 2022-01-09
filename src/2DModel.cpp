@@ -8,22 +8,15 @@
 #include <fluid2d/Event.hpp>
 #include <fluid2d/Data.hpp>
 
-/*
- * Je l'aurais bien mis en champs du main mais j'arrive pas à créer le lambda du coup..
- * Ca marche pas ça:
- * [&capture](float d){return colors.get_color(d);}
- *
- * Donc pour l'instant ça reste en static
- */
-static ColorGradient colors{
-        Color{.00, .00, .00},
-        Color{.11, .67, .00},
-        Color{.61, 1.0, .25},
-        Color{1.0, 1.0, .37},
-        Color{.93, 1.0, .91}
-};
+//ColorGradient colors{
+//        Color{.00, .00, .00},
+//        Color{.11, .67, .00},
+//        Color{.61, 1.0, .25},
+//        Color{1.0, 1.0, .37},
+//        Color{.93, 1.0, .91}
+//};
 
-//static ColorGradient colors{
+//ColorGradient colors{
 //        Color{0.0, 0.0, 0.0},
 //        Color{.14, .14, .77},
 //        Color{.46, .96, 1.0},
@@ -37,6 +30,13 @@ int main()
     int TileSize{5};
     fluid2d::Event event(N * TileSize, 5);
     fluid2d::Data data(N, .1, 0, .0001, 100);
+    ColorGradient colors{
+            Color{.00, .00, .00},
+            Color{.11, .67, .00},
+            Color{.61, 1.0, .25},
+            Color{1.0, 1.0, .37},
+            Color{.93, 1.0, .91}
+    };
 
     // Application loop:
     GridWindowManager window(event.winX(), event.winY(), N, N);
@@ -68,7 +68,7 @@ int main()
         data.vel_step();
         data.dens_step();
 
-        window.display_grid<float>(data.flat(), [](float d)
+        window.display_grid<float>(data.flat(), [&colors](float d)
         {
             return colors.get_color(d);
         });

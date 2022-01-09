@@ -4,6 +4,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <SDL/SDL.h>
+#include <functional>
 
 #include "ShadersManager.hpp"
 #include "Vertex2D.hpp"
@@ -34,7 +35,7 @@ class GridWindowManager
         * (may be identity (id,id,id) for shades of grey) (representing the density of the fluid on a cell)
         */
         template <typename T>
-        void display_grid(const std::vector<T>& grid, Color (*get_color)(T))
+        void display_grid(const std::vector<T>& grid, std::function<Color(T)> get_color)
         {
             std::vector<Vertex2D> squares = get_non_empty_squares(step_x, step_y, grid, get_color);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -58,7 +59,7 @@ class GridWindowManager
         *  Param : Color (*f)(T) : function taking datas from the grid returning a Color containing floats between 0 and 1
         */
         template<typename T>
-        std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, Color (*f)(T))
+        std::vector<Vertex2D> get_non_empty_squares(float step_x, float step_y, std::vector<T> grid, std::function<Color(T)> f)
         {
             int rows = 0;
             int cols = 0;
