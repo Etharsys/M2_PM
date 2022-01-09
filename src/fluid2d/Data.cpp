@@ -123,8 +123,6 @@ namespace fluid2d
 
 #define IX(i, j) ((i)+(N+2)*(j))
 #define SWAP(x0, x) {float * tmp=x0;x0=x;x=tmp;}
-#define FOR_EACH_CELL for ( i=1 ; i<=N ; i++ ) { for ( j=1 ; j<=N ; j++ ) {
-#define END_FOR }}
 
     void add_source(int N, float *x, const float *s, float dt)
     {
@@ -164,11 +162,15 @@ namespace fluid2d
 
         for (k = 0; k < 20; k++)
         {
-            FOR_EACH_CELL
+            for (i = 1; i <= N; i++)
+            {
+                for (j = 1; j <= N; j++)
+                {
                     x[IX(i, j)] =
                             (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] + x[IX(i, j - 1)] + x[IX(i, j + 1)]))
                             / c;
-            END_FOR
+                }
+            }
             set_bnd(N, b, x);
         }
     }
@@ -187,7 +189,10 @@ namespace fluid2d
         float x, y, s0, t0, s1, t1, dt0;
 
         dt0 = dt * Nf;
-        FOR_EACH_CELL
+        for (i = 1; i <= N; i++)
+        {
+            for (j = 1; j <= N; j++)
+            {
                 // fluid particle back tracing
                 x = static_cast<float>(i) - dt0 * u[IX(i, j)];
                 y = static_cast<float>(j) - dt0 * v[IX(i, j)];
@@ -219,7 +224,8 @@ namespace fluid2d
                 t0 = 1 - t1;
                 d[IX(i, j)] = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) +
                               s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
-        END_FOR
+            }
+        }
         set_bnd(N, b, d);
     }
 
@@ -227,20 +233,26 @@ namespace fluid2d
     {
         auto Nf = static_cast<float>(N);
         int i, j;
-
-        FOR_EACH_CELL
+        for (i = 1; i <= N; i++)
+        {
+            for (j = 1; j <= N; j++)
+            {
                 div[IX(i, j)] = -0.5f * (u[IX(i + 1, j)] - u[IX(i - 1, j)] + v[IX(i, j + 1)] - v[IX(i, j - 1)]) / Nf;
                 p[IX(i, j)] = 0;
-        END_FOR
+            }
+        }
         set_bnd(N, 0, div);
         set_bnd(N, 0, p);
 
         lin_solve(N, 0, p, div, 1, 4);
-
-        FOR_EACH_CELL
+        for (i = 1; i <= N; i++)
+        {
+            for (j = 1; j <= N; j++)
+            {
                 u[IX(i, j)] -= 0.5f * Nf * (p[IX(i + 1, j)] - p[IX(i - 1, j)]);
                 v[IX(i, j)] -= 0.5f * Nf * (p[IX(i, j + 1)] - p[IX(i, j - 1)]);
-        END_FOR
+            }
+        }
         set_bnd(N, 1, u);
         set_bnd(N, 2, v);
     }
