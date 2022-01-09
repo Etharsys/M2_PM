@@ -23,6 +23,7 @@ namespace fluid2d
 
         void vel_step(const Config& config);
 
+    private:
         int N;
         float *u, *v, *u_prev, *v_prev;
         float *dens, *dens_prev;
