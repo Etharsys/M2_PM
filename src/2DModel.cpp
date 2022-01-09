@@ -44,7 +44,7 @@ int main()
     fluid2d::Data data(N);
 
     // Application loop:
-    GridWindowManager window(event.win_x, event.win_y, N, N);
+    GridWindowManager window(event.winX(), event.winY(), N, N);
     bool done = false;
     while (!done)
     {

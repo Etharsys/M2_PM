@@ -79,39 +79,34 @@ namespace fluid2d
 
     void Data::get_from_UI(Event &event, const Config &config) const
     {
-        int i, j;
-
-        for (i = 0; i < config.size(); i++)
+        for (int i = 0; i < config.size(); i++)
         {
             u_prev[i] = v_prev[i] = dens_prev[i] = 0.0f;
         }
 
-        if (!event.mouse_down[0] && !event.mouse_down[2])
+        if (!event.right_click() && !event.left_click())
         {
             return;
         }
 
-        i = static_cast<int>((static_cast<float>(event.mx) / static_cast<float>(event.win_x)) * config.Nf) + 1;
-        j = static_cast<int>((static_cast<float>(event.my) / static_cast<float>(event.win_y)) * config.Nf) + 1;
+        auto [i, j] = event.get_position(config.Nf);
 
         if (i < 1 || i > N || j < 1 || j > N)
         {
             return;
         }
 
-        if (event.mouse_down[0])
+        if (event.left_click())
         {
-            u_prev[IX(i, j)] = config.force * static_cast<float>(event.mx - event.omx);
-            v_prev[IX(i, j)] = config.force * static_cast<float>(event.my - event.omy);
+            u_prev[IX(i, j)] = config.force * event.x_offset();
+            v_prev[IX(i, j)] = config.force * event.y_offset();
         }
 
-        if (event.mouse_down[2])
+        if (event.right_click())
         {
             dens_prev[IX(i, j)] = config.source;
         }
-
-        event.omx = event.mx;
-        event.omy = event.my;
+        event.reset_movement();
     }
 
 // Fluid simulation

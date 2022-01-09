@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(FluideModelizer LANGUAGES C CXX)
+set(CXX_STANDARD C++20)
 
 find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
