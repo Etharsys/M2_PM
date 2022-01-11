@@ -27,7 +27,7 @@ int main(int argc, char const *argv[])
                                             {
                                                 nbParticles++;
                                             }
-                                            return Color(0, 0, nbParticles / 100.);
+                                            return Color(0, 0, nbParticles / 16.);
                                         });
         fluid.update();
     }

@@ -68,7 +68,8 @@ public:
         int old_index = get_index(row, column, cube);
         row = get_row(new_y);
         column = get_column(new_x);
-        cube = get_cube(new_z) int new_index = get_index(row, column, cube);
+        cube = get_cube(new_z);
+         int new_index = get_index(row, column, cube);
         if (old_index == new_index)
         {
             element->position[0] = new_x;
@@ -214,7 +215,7 @@ private:
      */
     int get_column(const float x) const { return int((x - x_min) / gap); }
 
-    int get_cube(const float z) const {return int((z_max - z) / gap)};
+    int get_cube(const float z) const {return int((z_max - z) / gap);};
 
     /*
      * @brief get tile index

@@ -32,7 +32,8 @@ Fluid::Fluid(const int nb_particles)
     {
         float x = float(rand()) / RAND_MAX * (WIDTH - 2 * H) + H;
         float y = float(rand()) / RAND_MAX * (HEIGHT - 2 * H) + H;
-        particles.emplace_back(x, y);
+        float z = float(rand()) / RAND_MAX * (HEIGHT - 2 * H) + H;
+        particles.emplace_back(x, y,z);
     }
     particles_grid.sort_grid(particles);
 }
