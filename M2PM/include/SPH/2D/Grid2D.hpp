@@ -20,7 +20,7 @@ public:
      *  @param y_min_ grid y_min
      *  @param y_max_ grid y_max
      */
-    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_), y_max(y_max_), nb_columns(get_column(x_max_) + 1), nb_rows(get_row(y_min_) + 1)
+    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_) : gap(gap_), x_min(x_min_ - gap), y_max(y_max_ + gap), nb_columns(get_column(x_max_ + gap) + 1), nb_rows(get_row(y_min_ - gap) + 1)
     {
         grid = std::vector<T *>(nb_rows * nb_columns);
     }
@@ -31,41 +31,15 @@ public:
      */
     const std::array<T *, 9>& get_surrounding_elements(const int center)
     {
-        int row = int(center / nb_columns);
-        int column = center - (row * nb_columns);
         surrounding_elements[0] = grid[center];
-        if (column < nb_columns - 1) // right
-        {
-            surrounding_elements[1] = grid[center + 1];
-        }
-        if (row < nb_rows - 1) // down
-        {
-            surrounding_elements[2] = grid[center + nb_columns];
-        }
-        if (column > 0 && row < nb_rows - 1) // down-left
-        {
-            surrounding_elements[3] = grid[center + nb_columns - 1];
-        }
-        if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
-        {
-            surrounding_elements[4] = grid[center + nb_columns + 1];
-        }
-        if (row > 0) // up
-        {
-            surrounding_elements[5] = grid[center - nb_columns];
-        }
-        if (column > 0 && row > 0) // up-left
-        {
-            surrounding_elements[6] = grid[center - nb_columns - 1];
-        }
-        if (column < nb_columns - 1 && row > 0) // up-right
-        {
-            surrounding_elements[7] = grid[center - nb_columns + 1];
-        }
-        if (column > 0) // left
-        {
-            surrounding_elements[8] = grid[center - 1];
-        }
+        surrounding_elements[1] = grid[center + 1];
+        surrounding_elements[2] = grid[center + nb_columns];
+        surrounding_elements[3] = grid[center + nb_columns - 1];
+        surrounding_elements[4] = grid[center + nb_columns + 1];
+        surrounding_elements[5] = grid[center - nb_columns];
+        surrounding_elements[6] = grid[center - nb_columns - 1];
+        surrounding_elements[7] = grid[center - nb_columns + 1];
+        surrounding_elements[8] = grid[center - 1];
         return surrounding_elements;
     }
 
@@ -226,12 +200,12 @@ private:
      */
     int get_index(const float row, const float column) const { return row * nb_columns + column; }
 
+    /*tile gap*/
+    const float gap = 0;
     /*grid x_min*/
     const float x_min = 0;
     /*grid y_min*/
     const float y_max = 0;
-    /*tile gap*/
-    const float gap = 0;
     /*number of columns*/
     const int nb_columns = 0;
     /*number of rows*/

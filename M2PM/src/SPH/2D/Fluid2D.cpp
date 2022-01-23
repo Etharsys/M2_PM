@@ -51,70 +51,76 @@ Fluid::Fluid(const Eigen::Vector2d center, const int radius, const float gap)
 
 void Fluid::compute_density_pressure()
 {
-    #pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < particles_grid.size(); i++)
     {
-        auto surrounding_particles = particles_grid.get_surrounding_elements(i);
-        for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
+        if (particles_grid[i] != nullptr)
         {
-            particle_a->density = 0;
-            for (auto particle_b : surrounding_particles)
+            auto surrounding_particles = particles_grid.get_surrounding_elements(i);
+            for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
             {
-                for (; particle_b != nullptr; particle_b = particle_b->next)
+                particle_a->density = 0;
+                for (auto particle_b : surrounding_particles)
                 {
-                    Eigen::Vector2d vector_ab = particle_b->position - particle_a->position;
-                    float squared_distance = vector_ab.squaredNorm();
-                    if (squared_distance < HSQ)
+                    for (; particle_b != nullptr; particle_b = particle_b->next)
                     {
-                        particle_a->density += MASS_X_POLY6 * pow(HSQ - squared_distance, 3.f);
+                        Eigen::Vector2d vector_ab = particle_b->position - particle_a->position;
+                        float squared_distance = vector_ab.squaredNorm();
+                        if (squared_distance < HSQ)
+                        {
+                            particle_a->density += MASS_X_POLY6 * pow(HSQ - squared_distance, 3.f);
+                        }
                     }
                 }
+                particle_a->pressure = GAS_CONST * (particle_a->density - REST_DENS);
             }
-            particle_a->pressure = GAS_CONST * (particle_a->density - REST_DENS);
         }
     }
 }
 
 void Fluid::compute_forces()
 {
-    #pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < particles_grid.size(); i++)
     {
-        auto surrounding_particles = particles_grid.get_surrounding_elements(i);
-        for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
+        if (particles_grid[i] != nullptr)
         {
-            Eigen::Vector2d pressure_force(0.f,0.f);
-            Eigen::Vector2d viscosity_force(0.f,0.f);
-            for (auto particle_b : surrounding_particles)
+            auto surrounding_particles = particles_grid.get_surrounding_elements(i);
+            for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
             {
-                for (; particle_b != nullptr; particle_b = particle_b->next)
+                Eigen::Vector2d pressure_force(0.f, 0.f);
+                Eigen::Vector2d viscosity_force(0.f, 0.f);
+                for (auto particle_b : surrounding_particles)
                 {
-                    if (*particle_a == *particle_b)
+                    for (; particle_b != nullptr; particle_b = particle_b->next)
                     {
-                        continue;
-                    }
-                    Eigen::Vector2d vector_ab = particle_b->position - particle_a->position;
-                    float distance = vector_ab.norm();
-                    vector_ab = vector_ab.normalized();
-                    if (distance < H)
-                    {
-                        float pressure = MASS * (particle_a->pressure + particle_b->pressure);
-                        float viscosity_coef = VISC_LAP * (H - distance);
-                        float pressure_coef = SPIKY_GRAD * pow(H - distance, 3.f);
-                        pressure_force += -vector_ab * pressure / (2.f * particle_b->density) * pressure_coef;
-                        viscosity_force += VISC_X_MASS * (particle_b->velocity - particle_a->velocity) / particle_b->density * viscosity_coef;
+                        if (*particle_a == *particle_b)
+                        {
+                            continue;
+                        }
+                        Eigen::Vector2d vector_ab = particle_b->position - particle_a->position;
+                        float distance = vector_ab.norm();
+                        vector_ab = vector_ab.normalized();
+                        if (distance < H)
+                        {
+                            float pressure = MASS * (particle_a->pressure + particle_b->pressure);
+                            float viscosity_coef = VISC_LAP * (H - distance);
+                            float pressure_coef = SPIKY_GRAD * pow(H - distance, 3.f);
+                            pressure_force += -vector_ab * pressure / (2.f * particle_b->density) * pressure_coef;
+                            viscosity_force += VISC_X_MASS * (particle_b->velocity - particle_a->velocity) / particle_b->density * viscosity_coef;
+                        }
                     }
                 }
+                Eigen::Vector2d gravity_force = G_X_MASS / particle_a->density;
+                particle_a->force = pressure_force + viscosity_force + gravity_force;
             }
-            Eigen::Vector2d gravity_force = G_X_MASS / particle_a->density;
-            particle_a->force = pressure_force + viscosity_force + gravity_force;
         }
     }
 }
 
 void Fluid::integrate()
 {
-    #pragma omp parallel for
+#pragma omp parallel for
     for (auto &particle : particles)
     {
         // forward Euler integration
@@ -141,7 +147,7 @@ void Fluid::integrate()
             particle.velocity.y() *= BOUND_DAMPING;
             newPositon.y() = HEIGHT - H;
         }
-        #pragma omp critical
+#pragma omp critical
         particles_grid.move_element(newPositon.x(), newPositon.y(), &particle);
     }
 }

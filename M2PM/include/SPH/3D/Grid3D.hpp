@@ -19,7 +19,7 @@ public:
      *  @param y_min_ grid y_min
      *  @param y_max_ grid y_max
      */
-    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_, const float z_min_, const float z_max_) : gap(gap_), x_min(x_min_), y_max(y_max_), z_max(z_max_), nb_columns(get_column(x_max_) + 1), nb_rows(get_row(y_min_) + 1), nb_cubes(get_cube(z_max) + 1)
+    Grid(const float gap_, const float x_min_, const float x_max_, const float y_min_, const float y_max_, const float z_min_, const float z_max_) : gap(gap_), x_min(x_min_ - gap), y_max(y_max_ + gap), z_max(z_max_ + gap), nb_columns(get_column(x_max_ + gap) + 1), nb_rows(get_row(y_min_ - gap) + 1), nb_slices(get_cube(z_max + gap) + 1)
     {
         grid = std::vector<T *>(nb_rows * nb_columns);
     }
@@ -28,44 +28,35 @@ public:
      *  @param center grid tile index
      *  @return list of element doubly linked list
      */
-    const std::array<T *, 27>& get_surrounding_elements(const int center)
+    const std::array<T *, 27> &get_surrounding_elements(const int center)
     {
-        int row = int(center / nb_columns);
-        int column = int(center/ nb_rows);
-        int cube = center - (row * nb_columns + column * nb_cubes); 
         surrounding_elements[0] = grid[center];
-        if (column < nb_columns - 1) // right
-        {
-            surrounding_elements[1] = grid[center + 1];
-        }
-        if (row < nb_rows - 1) // down
-        {
-            surrounding_elements[2] = grid[center + nb_columns];
-        }
-        if (column > 0 && row < nb_rows - 1) // down-left
-        {
-            surrounding_elements[3] = grid[center + nb_columns - 1];
-        }
-        if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
-        {
-            surrounding_elements[4] = grid[center + nb_columns + 1];
-        }
-        if (row > 0) // up
-        {
-            surrounding_elements[5] = grid[center - nb_columns];
-        }
-        if (column > 0 && row > 0) // up-left
-        {
-            surrounding_elements[6] = grid[center - nb_columns - 1];
-        }
-        if (column < nb_columns - 1 && row > 0) // up-right
-        {
-            surrounding_elements[7] = grid[center - nb_columns + 1];
-        }
-        if (column > 0) // left
-        {
-            surrounding_elements[8] = grid[center - 1];
-        }
+        surrounding_elements[1] = grid[center + 1];
+        surrounding_elements[2] = grid[center + nb_columns];
+        surrounding_elements[3] = grid[center + nb_columns - 1];
+        surrounding_elements[4] = grid[center + nb_columns + 1];
+        surrounding_elements[5] = grid[center - nb_columns];
+        surrounding_elements[6] = grid[center - nb_columns - 1];
+        surrounding_elements[7] = grid[center - nb_columns + 1];
+        surrounding_elements[8] = grid[center - 1];
+        surrounding_elements[9] = grid[center + nb_columns * nb_rows];
+        surrounding_elements[10] = grid[center + 1 + nb_columns * nb_rows];
+        surrounding_elements[11] = grid[center + nb_columns + nb_columns * nb_rows];
+        surrounding_elements[12] = grid[center + nb_columns - 1 + nb_columns * nb_rows];
+        surrounding_elements[13] = grid[center + nb_columns + 1 + nb_columns * nb_rows];
+        surrounding_elements[14] = grid[center - nb_columns + nb_columns * nb_rows];
+        surrounding_elements[15] = grid[center - nb_columns - 1 + nb_columns * nb_rows];
+        surrounding_elements[16] = grid[center - nb_columns + 1 + nb_columns * nb_rows];
+        surrounding_elements[17] = grid[center - 1 + nb_columns * nb_rows];
+        surrounding_elements[18] = grid[center - nb_columns * nb_rows];
+        surrounding_elements[19] = grid[center + 1 - nb_columns * nb_rows];
+        surrounding_elements[20] = grid[center + nb_columns - nb_columns * nb_rows];
+        surrounding_elements[21] = grid[center + nb_columns - 1 - nb_columns * nb_rows];
+        surrounding_elements[22] = grid[center + nb_columns + 1 - nb_columns * nb_rows];
+        surrounding_elements[23] = grid[center - nb_columns - nb_columns * nb_rows];
+        surrounding_elements[24] = grid[center - nb_columns - 1 - nb_columns * nb_rows];
+        surrounding_elements[25] = grid[center - nb_columns + 1 - nb_columns * nb_rows];
+        surrounding_elements[26] = grid[center - 1 - nb_columns * nb_rows];
         return surrounding_elements;
     }
     /*
@@ -83,7 +74,7 @@ public:
         row = get_row(new_y);
         column = get_column(new_x);
         cube = get_cube(new_z);
-         int new_index = get_index(row, column, cube);
+        int new_index = get_index(row, column, cube);
         if (old_index == new_index)
         {
             element->position[0] = new_x;
@@ -161,9 +152,9 @@ public:
         return nb_columns;
     }
 
-    int get_nb_cubes() const
+    int get_nb_slices() const
     {
-        return nb_cubes;
+        return nb_slices;
     }
 
 private:
@@ -229,28 +220,28 @@ private:
      */
     int get_column(const float x) const { return int((x - x_min) / gap); }
 
-    int get_cube(const float z) const {return int((z_max - z) / gap);};
+    int get_cube(const float z) const { return int((z_max - z) / gap); };
 
     /*
      * @brief get tile index
      * @return tile index
      */
-    int get_index(const float row, const float column, const float cube) const { return row * nb_columns + column * nb_cubes + cube; }
+    int get_index(const float row, const float column, const float cube) const { return row * nb_columns + column * nb_slices + cube; }
 
+    /*tile gap*/
+    const float gap = 0;
     /*grid x_min*/
     const float x_min = 0;
     /*grid y_min*/
     const float y_max = 0;
     /*grid y_min*/
     const float z_max = 0;
-    /*tile gap*/
-    const float gap = 0;
     /*number of columns*/
     const int nb_columns = 0;
     /*number of rows*/
     const int nb_rows = 0;
-
-    const int nb_cubes = 0;
+    /*number of slices (z depth)*/
+    const int nb_slices = 0;
     /*grid tiles*/
     std::vector<T *> grid;
     /*static array for surrounding elements*/

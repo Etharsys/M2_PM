@@ -62,23 +62,26 @@ void Fluid::compute_density_pressure()
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < particles_grid.size(); i++)
     {
-        auto surrounding_particles = particles_grid.get_surrounding_elements(i);
-        for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
+        if (particles_grid[i] != nullptr)
         {
-            particle_a->density = 0;
-            for (auto particle_b : surrounding_particles)
+            auto surrounding_particles = particles_grid.get_surrounding_elements(i);
+            for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
             {
-                for (; particle_b != nullptr; particle_b = particle_b->next)
+                particle_a->density = 0;
+                for (auto particle_b : surrounding_particles)
                 {
-                    Eigen::Vector3d vector_ab = particle_b->position - particle_a->position;
-                    float squared_distance = vector_ab.squaredNorm();
-                    if (squared_distance < HSQ)
+                    for (; particle_b != nullptr; particle_b = particle_b->next)
                     {
-                        particle_a->density += MASS_X_POLY6 * pow(HSQ - squared_distance, 3.f);
+                        Eigen::Vector3d vector_ab = particle_b->position - particle_a->position;
+                        float squared_distance = vector_ab.squaredNorm();
+                        if (squared_distance < HSQ)
+                        {
+                            particle_a->density += MASS_X_POLY6 * pow(HSQ - squared_distance, 3.f);
+                        }
                     }
                 }
+                particle_a->pressure = GAS_CONST * (particle_a->density - REST_DENS);
             }
-            particle_a->pressure = GAS_CONST * (particle_a->density - REST_DENS);
         }
     }
 }
@@ -88,6 +91,8 @@ void Fluid::compute_forces()
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < particles_grid.size(); i++)
     {
+        if (particles_grid[i] != nullptr)
+        {
         auto surrounding_particles = particles_grid.get_surrounding_elements(i);
         for (auto particle_a = particles_grid[i]; particle_a != nullptr; particle_a = particle_a->next)
         {
@@ -116,6 +121,7 @@ void Fluid::compute_forces()
             }
             Eigen::Vector3d gravity_force = G_X_MASS / particle_a->density;
             particle_a->force = pressure_force + viscosity_force + gravity_force;
+        }
         }
     }
 }
@@ -148,6 +154,16 @@ void Fluid::integrate()
         {
             particle.velocity.y() *= BOUND_DAMPING;
             newPositon.y() = HEIGHT - H;
+        }
+        if (newPositon.z() - H < 0.f)
+        {
+            particle.velocity.z() *= BOUND_DAMPING;
+            newPositon.z() = H;
+        }
+        if (newPositon.z() + H > HEIGHT)
+        {
+            particle.velocity.z() *= BOUND_DAMPING;
+            newPositon.z() = HEIGHT - H;
         }
         #pragma omp critical
         particles_grid.move_element(newPositon.x(), newPositon.y(),newPositon.z(), &particle);
