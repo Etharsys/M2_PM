@@ -28,32 +28,46 @@ public:
      *  @param center grid tile index
      *  @return list of element doubly linked list
      */
-    const std::vector<T *> get_surrounding_elements(const int center)
+    const std::array<T *, 27>& get_surrounding_elements(const int center)
     {
-        std::vector<T *> surrounding_elements;
         int row = int(center / nb_columns);
         int column = int(center/ nb_rows);
         int cube = center - (row * nb_columns + column * nb_cubes); 
-        surrounding_elements.emplace_back(grid[center]);
+        surrounding_elements[0] = grid[center];
         if (column < nb_columns - 1) // right
         {
-            surrounding_elements.emplace_back(grid[center + 1]);
+            surrounding_elements[1] = grid[center + 1];
         }
         if (row < nb_rows - 1) // down
         {
-            surrounding_elements.emplace_back(grid[center + nb_columns]);
+            surrounding_elements[2] = grid[center + nb_columns];
         }
         if (column > 0 && row < nb_rows - 1) // down-left
         {
-            surrounding_elements.emplace_back(grid[center + nb_columns - 1]);
+            surrounding_elements[3] = grid[center + nb_columns - 1];
         }
         if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
         {
-            surrounding_elements.emplace_back(grid[center + nb_columns + 1]);
+            surrounding_elements[4] = grid[center + nb_columns + 1];
+        }
+        if (row > 0) // up
+        {
+            surrounding_elements[5] = grid[center - nb_columns];
+        }
+        if (column > 0 && row > 0) // up-left
+        {
+            surrounding_elements[6] = grid[center - nb_columns - 1];
+        }
+        if (column < nb_columns - 1 && row > 0) // up-right
+        {
+            surrounding_elements[7] = grid[center - nb_columns + 1];
+        }
+        if (column > 0) // left
+        {
+            surrounding_elements[8] = grid[center - 1];
         }
         return surrounding_elements;
     }
-
     /*
      * @brief move element in the right tile
      * new_x element new x position
@@ -239,4 +253,6 @@ private:
     const int nb_cubes = 0;
     /*grid tiles*/
     std::vector<T *> grid;
+    /*static array for surrounding elements*/
+    std::array<T *, 27> surrounding_elements{};
 };

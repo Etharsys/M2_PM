@@ -25,31 +25,46 @@ public:
         grid = std::vector<T *>(nb_rows * nb_columns);
     }
 
-    /* @brief get center, down-left, down, down-right and right surrounding elements
+    /*  @brief get center, down-left, down, down-right and right surrounding elements
      *  @param center grid tile index
      *  @return list of element doubly linked list
      */
-    const std::vector<T *> get_surrounding_elements(const int center)
+    const std::array<T *, 9>& get_surrounding_elements(const int center)
     {
-        std::vector<T *> surrounding_elements;
         int row = int(center / nb_columns);
         int column = center - (row * nb_columns);
-        surrounding_elements.emplace_back(grid[center]);
+        surrounding_elements[0] = grid[center];
         if (column < nb_columns - 1) // right
         {
-            surrounding_elements.emplace_back(grid[center + 1]);
+            surrounding_elements[1] = grid[center + 1];
         }
         if (row < nb_rows - 1) // down
         {
-            surrounding_elements.emplace_back(grid[center + nb_columns]);
+            surrounding_elements[2] = grid[center + nb_columns];
         }
         if (column > 0 && row < nb_rows - 1) // down-left
         {
-            surrounding_elements.emplace_back(grid[center + nb_columns - 1]);
+            surrounding_elements[3] = grid[center + nb_columns - 1];
         }
         if (column < nb_columns - 1 && row < nb_rows - 1) // down-right
         {
-            surrounding_elements.emplace_back(grid[center + nb_columns + 1]);
+            surrounding_elements[4] = grid[center + nb_columns + 1];
+        }
+        if (row > 0) // up
+        {
+            surrounding_elements[5] = grid[center - nb_columns];
+        }
+        if (column > 0 && row > 0) // up-left
+        {
+            surrounding_elements[6] = grid[center - nb_columns - 1];
+        }
+        if (column < nb_columns - 1 && row > 0) // up-right
+        {
+            surrounding_elements[7] = grid[center - nb_columns + 1];
+        }
+        if (column > 0) // left
+        {
+            surrounding_elements[8] = grid[center - 1];
         }
         return surrounding_elements;
     }
@@ -85,7 +100,7 @@ public:
     /*
      * @brief add and sort all elements in the grid
      */
-    void sort_grid(std::vector<T>& elements)
+    void sort_grid(std::vector<T> &elements)
     {
         for (auto &element : elements)
         {
@@ -116,27 +131,27 @@ public:
     }
 
     /*
-    * @brief get grid container
-    * @return grid vector
-    */
-    const std::vector<T *>& get_grid() const
+     * @brief get grid container
+     * @return grid vector
+     */
+    const std::vector<T *> &get_grid() const
     {
         return grid;
     }
 
     /*
-    * @brief get the number of row in the grid
-    * @return the number of row
-    */
+     * @brief get the number of row in the grid
+     * @return the number of row
+     */
     int get_nb_row() const
     {
         return nb_rows;
     }
 
     /*
-    * @brief get the number of column in the grid
-    * @return the number of column
-    */
+     * @brief get the number of column in the grid
+     * @return the number of column
+     */
     int get_nb_columns() const
     {
         return nb_columns;
@@ -144,10 +159,10 @@ public:
 
 private:
     /*
-    * @brief remove element in the doubly linked list
-    * @param element element to remove
-    * @param index grid tile
-    */
+     * @brief remove element in the doubly linked list
+     * @param element element to remove
+     * @param index grid tile
+     */
     void remove(T *element, int index)
     {
         if (element->previous == nullptr) // head
@@ -223,5 +238,6 @@ private:
     const int nb_rows = 0;
     /*grid tiles*/
     std::vector<T *> grid;
-    
+    /*array for surrounding elements*/
+    std::array<T *, 9> surrounding_elements{};
 };

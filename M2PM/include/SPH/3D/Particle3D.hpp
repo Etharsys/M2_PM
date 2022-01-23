@@ -38,16 +38,10 @@ public:
 	Eigen::Vector3d velocity{0., 0., 0.};
 	/*particle force applied*/
 	Eigen::Vector3d force{0., 0., 0.};
-	/*particle viscosity applied*/
-	Eigen::Vector3d viscosity{0., 0., 0.};
 	/*particle density*/
 	float density = 0.f;
 	/*particle pressure*/
 	float pressure = 0.f;
-	/*is density already processed*/
-	bool processed_density = false;
-	/*is force already processed*/
-	bool processed_force = false;
 	/*previous particle in the doubly linked list*/
 	Particle *previous;
 	/*next particle in the doubly linked list*/
