@@ -4,7 +4,7 @@
 #include <iterator>
 #include <fstream>
 #include <sstream>
-#include "ShadersManager.hpp"
+#include "Graphics/ShadersManager.hpp"
 
 /* @brief used to display errors on shaders compilation 
 *  Param : GLuint shader : GL int representing a shader

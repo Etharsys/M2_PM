@@ -1,24 +1,33 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(FluideModelizer LANGUAGES C CXX)
+project(M2PM LANGUAGES C CXX)
 
 find_package(SDL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 
-include_directories(${SDL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS})
+set(LIBRARY_FOLDER_NAME "M2PM")
+set(SRC_FOLDER_NAME "src")
+set(INCLUDE_FOLDER_NAME "include")
 
-set(ALL_LIBRARIES ${SDL_LIBRARY} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})
+file(GLOB_RECURSE SRC_FILES ${LIBRARY_FOLDER_NAME}/${SRC_FOLDER_NAME}/*.cpp ${LIBRARY_FOLDER_NAME}/${INCLUDE_FOLDER_NAME}/*.hpp)
 
-file(GLOB_RECURSE src_files    src/*.cpp)
-file(GLOB_RECURSE header_files headers/*.hpp)
+add_library(${LIBRARY_FOLDER_NAME} ${SRC_FILES})
+
+include_directories(${SDL_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${LIBRARY_FOLDER_NAME}/${INCLUDE_FOLDER_NAME})
+
+set(ALL_LIBRARIES ${LIBRARY_FOLDER_NAME} ${SDL_LIBRARY} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES})
+
+file(GLOB_RECURSE SRC_FILES ${SRC_FOLDER_NAME}/*.cpp)
 file(GLOB_RECURSE shader_files *.glsl)
 
-message(STATUS "source files founded : " ${src_files})
-message(STATUS "header files founded : " ${header_files})
+message(STATUS "source files founded : " ${SRC_FILES})
 
-add_executable(modelizer1 ${src_files} ${header_files})
-target_include_directories(modelizer1 PRIVATE ./headers)
-target_link_libraries(modelizer1 ${ALL_LIBRARIES})
+foreach(MAIN_FILE ${SRC_FILES})
+    get_filename_component(FILE ${MAIN_FILE} NAME_WE)
+    add_executable(${FILE} ${MAIN_FILE})
+    target_link_libraries(${FILE} ${ALL_LIBRARIES})
+endforeach()
+
 
 file(COPY shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
