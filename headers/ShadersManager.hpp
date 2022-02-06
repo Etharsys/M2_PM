@@ -19,6 +19,12 @@ class ShadersManager
         /* @brief Load grid.vs.glsl and grid.fs.glsl shaders*/
         void load_grid_shaders();
 
+        /* @brief Load 3D.fs.glsl and 3D.vs.glsl shaders */
+        void load_sphere_shaders();
+
+        /* @brief Load 3D.fs.glsl and 3D.vs.glsl shaders (shaders with directionnal light) */
+        void load_sphere_blinphong_shaders();
+
         /* @brief Load shaders vs_path and fs_path (from the folder M2_PM/build)
         *  Param : std::string vs_path : path for vertex shader
         *  Param : std::string fs_path : path for fragment shader

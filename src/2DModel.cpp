@@ -3,7 +3,7 @@
 #include <iostream>
 #include <iterator>
 
-int main()
+int paslemain()
 {
     std::vector<float> grid(100000000);
     /*

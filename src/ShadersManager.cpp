@@ -102,3 +102,13 @@ void ShadersManager::load_grid_shaders()
     load_shaders("shaders/grid.vs.glsl"
         ,"shaders/grid.fs.glsl");
 }
+
+void ShadersManager::load_sphere_blinphong_shaders() {
+    load_shaders("shaders/3D.vs.glsl"
+        , "shaders/3Dblinnphong.fs.glsl");
+}
+
+void ShadersManager::load_sphere_shaders() {
+    load_shaders("shaders/3D.vs.glsl"
+        , "shaders/3D.fs.glsl");
+}
