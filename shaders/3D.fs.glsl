@@ -6,10 +6,10 @@ in vec3 vVertexPosition;
 in vec3 vVertexNormal;
 in vec2 vVertexTexture;
 
-in vec3 vColor;
+uniform vec3 uColor;
 
 out vec3 fColor;
 
 void main() {
-    fColor = vColor;
+    fColor = uColor;
 };

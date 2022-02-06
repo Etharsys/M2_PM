@@ -6,7 +6,7 @@ in vec3 vVertexPosition;
 in vec3 vVertexNormal;
 in vec2 vVertexTexture;
 
-in vec3 vColor;
+uniform vec3 uColor;
 
 uniform vec3 uLightDir_vs;
 uniform vec3 uLightIntensity;
@@ -25,5 +25,5 @@ vec3 blinnPhong(vec3 uKd){
 }
 
 void main() {
-    fColor = blinnPhong(vColor);
+    fColor = blinnPhong(uColor);
 };

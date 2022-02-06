@@ -51,3 +51,8 @@ glm::mat4 Camera::getViewMatrix() const
 
     return mat;
 }
+
+glm::vec3 Camera::getPosition() 
+{ 
+    return m_Position; 
+};

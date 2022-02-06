@@ -31,7 +31,7 @@ class Camera {
         glm::mat4 getViewMatrix() const;
 
 
-        glm::vec3 getPosition() { return m_Position; };
+        glm::vec3 getPosition();
         
 
     private:

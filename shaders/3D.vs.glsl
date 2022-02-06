@@ -8,12 +8,9 @@ uniform mat4 uMVPMatrix;
 uniform mat4 uMVMatrix;
 uniform mat4 uNormalMatrix;
 
-uniform vec3 uColor;
-
 out vec3 vVertexPosition;
 out vec3 vVertexNormal;
 out vec2 vVertexTexture;
-out vec3 vColor;
 
 void main() {
   vVertexPosition = vec3(uMVMatrix * vec4(aVertexPosition,1.));
@@ -21,5 +18,4 @@ void main() {
   gl_Position = uMVPMatrix * vec4(aVertexPosition, 1.);
 
   vVertexTexture = aVertexTexture;
-  vColor = uColor;
 };

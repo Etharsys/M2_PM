@@ -44,7 +44,7 @@ class SphereWindowManager
         template <typename T>
         void display_spheres(const std::vector<T>& spheres, std::function<Color(T)> get_color, std::function<glm::vec3(T)> get_pos) const
         {
-            glClearColor(0.1f,0.1f,0.1f,0.1f);
+            glClearColor(0.1f,0.1f,0.1f,0.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glm::mat4 globalMVMatrix = camera.getViewMatrix();
