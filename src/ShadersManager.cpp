@@ -62,7 +62,7 @@ bool compile_shader(GLuint shader)
 
 void ShadersManager::use_shaders()
 {
-    glUseProgram(program_id);
+		glUseProgram(program_id);
 }
 
 void ShadersManager::load_shaders(std::string vs_path, std::string fs_path)
@@ -101,4 +101,14 @@ void ShadersManager::load_grid_shaders()
 {
     load_shaders("shaders/grid.vs.glsl"
         ,"shaders/grid.fs.glsl");
+}
+
+void ShadersManager::load_cube_blinphong_shaders() {
+    load_shaders("shaders/3D.vs.glsl"
+        , "shaders/3Dblinnphong.fs.glsl");
+}
+
+void ShadersManager::load_cube_shaders() {
+    load_shaders("shaders/3D.vs.glsl"
+        , "shaders/3D.fs.glsl");
 }
